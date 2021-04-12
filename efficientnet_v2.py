@@ -82,7 +82,7 @@ def se_module(inputs, se_ratio=4):
 def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, use_se):
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     input_channel = inputs.shape[channel_axis]
-    hidden_dim = round(input_channel * expand_ratio)
+    hidden_dim = input_channel * expand_ratio
 
     if use_se:
         # pw
@@ -110,7 +110,7 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, use_se):
         return nn
 
 
-def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, strides=2, name="EfficientNetV2"):
+def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, depth_mul=1, strides=2, name="EfficientNetV2"):
     inputs = Input(shape=input_shape)
     out_channel = _make_divisible(24 * width_mult, 8)
     nn = conv2d_no_bias(inputs, out_channel, (3, 3), strides=strides, padding="same")
@@ -118,20 +118,21 @@ def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, wi
 
     expand_ratios = [1, 4, 4, 4, 6, 6]
     output_channels = [24, 48, 64, 128, 160, 272]
-    stages = [2, 4, 4, 6, 9, 15]
+    depths = [2, 4, 4, 6, 9, 15]
     strides = [1, 2, 2, 2, 1, 2]
     use_ses = [0, 0, 0, 1, 1, 1]
 
     pre_out = out_channel
-    for expand_ratio, output_channel, stage, stride, se in zip(expand_ratios, output_channels, stages, strides, use_ses):
+    for expand_ratio, output_channel, depth, stride, se in zip(expand_ratios, output_channels, depths, strides, use_ses):
         out = _make_divisible(output_channel * width_mult, 8)
-        for ii in range(stage):
+        depth = int(math.ceil(depth * depth_mul))
+        for ii in range(depth):
             stride = stride if ii == 0 else 1
             shortcut = True if out == pre_out and stride == 1 else False
             nn = MBConv(nn, out, stride, expand_ratio, shortcut, se)
             pre_out = out
 
-    out = _make_divisible(1792 * width_mult, 8) if width_mult > 1.0 else 1792
+    out = _make_divisible(1792 * width_mult, 8)
     nn = conv2d_no_bias(nn, out, (1, 1), strides=(1, 1), padding="valid")
     nn = batchnorm_with_activation(nn)
 
