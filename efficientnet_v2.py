@@ -15,6 +15,7 @@ from tensorflow.keras.layers import (
     Conv2D,
     Dense,
     DepthwiseConv2D,
+    Dropout,
     GlobalAveragePooling2D,
     Input,
     PReLU,
@@ -23,7 +24,7 @@ from tensorflow.keras.layers import (
 )
 import math
 
-BATCH_NORM_DECAY = 0.9
+BATCH_NORM_DECAY = 0.99
 BATCH_NORM_EPSILON = 1e-5
 CONV_KERNEL_INITIALIZER = keras.initializers.VarianceScaling(scale=2.0, mode="fan_out", distribution="truncated_normal")
 # CONV_KERNEL_INITIALIZER = 'glorot_uniform'
@@ -96,7 +97,7 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, use_se):
         # se
         nn = se_module(nn, se_ratio=4 * expand_ratio)
     else:
-        # fused
+        # fused, also se_ratio == 0
         nn = conv2d_no_bias(inputs, hidden_dim, (3, 3), strides=stride, padding="same")
         nn = batchnorm_with_activation(nn)
 
@@ -110,7 +111,7 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, use_se):
         return nn
 
 
-def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, depth_mul=1, strides=2, name="EfficientNetV2"):
+def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, depth_mul=1, dropout=1, strides=2, name="EfficientNetV2"):
     inputs = Input(shape=input_shape)
     out_channel = _make_divisible(24 * width_mult, 8)
     nn = conv2d_no_bias(inputs, out_channel, (3, 3), strides=strides, padding="same")
@@ -138,5 +139,7 @@ def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, wi
 
     if include_top:
         nn = GlobalAveragePooling2D(name="avg_pool")(nn)
+        if dropout > 0 and dropout < 1:
+            nn = Dropout(dropout)(nn)
         nn = Dense(classes, activation="softmax", name="predictions")(nn)
     return Model(inputs=inputs, outputs=nn, name=name)
