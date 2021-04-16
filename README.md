@@ -25,6 +25,17 @@
     | RandAugment  | 5     | 15    | 5     | 20    | 5     | 25    |
     | Mixup alpha  | 0     | 0     | 0     | 0.2   | 0     | 0.4   |
     | Dropout rate | 0.1   | 0.3   | 0.1   | 0.4   | 0.1   | 0.5   |
+
+  - Imagenet training detail
+    - RMSProp optimizer with decay 0.9 and momentum 0.9
+    - batch norm momentum 0.99; weight decay 1e-5
+    - Each model is trained for 350 epochs with total batch size 4096
+    - Learning rate is first warmed up from 0 to 0.256, and then decayed by 0.97 every 2.4 epochs
+    - We use exponential moving average with 0.9999 decay rate
+    - RandAugment (Cubuk et al., 2020)
+    - Mixup (Zhang et al., 2018)
+    - Dropout (Srivastava et al., 2014)
+    - and stochastic depth (Huang et al., 2016) with 0.8 survival probability
 ***
 
 ## Related Projects
