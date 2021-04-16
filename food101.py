@@ -2,6 +2,7 @@ import tensorflow_datasets as tfds
 import tensorflow as tf
 import numpy as np
 
+
 class RandomProcessImage:
     def __init__(self, target_shape=(300, 300), magnitude=0, keep_shape=False):
         self.target_shape, self.magnitude, self.keep_shape = target_shape, magnitude, keep_shape

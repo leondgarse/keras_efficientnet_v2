@@ -134,5 +134,11 @@ elif __name__ == "__train_test__":
     food101.plot_hist(["inceptionV3_magnitude_15_keep_shape_true_ls_01.json"], names=["aa"])
 
     hhs = progressive_with_dropout_randaug(
-        model, lr_scheduler, 52, stages=4, target_shapes=[128, 185, 242, 300], dropouts=[0.1, 0.2, 0.3, 0.4], magnitudes=[5, 8, 12, 15]
+        model,
+        lr_scheduler,
+        52,
+        stages=4,
+        target_shapes=[128, 185, 242, 300],
+        dropouts=[0.1, 0.2, 0.3, 0.4],
+        magnitudes=[5, 8, 12, 15],
     )

@@ -116,19 +116,30 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None
         return nn
 
 
-def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, depth_mul=1, dropout=1, strides=2, survivals=0.8, name="EfficientNetV2"):
+def EfficientNetV2(
+    input_shape=(224, 224, 3),
+    include_top=True,
+    classes=1000,
+    width_mul=1,
+    depth_mul=1,
+    dropout=1,
+    first_strides=2,
+    survivals=0.8,
+    name="EfficientNetV2",
+):
     """
+    first_strides is used in the first Conv2D layer.
     survivals is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
         Can be a constant value like `0.5` or `0.8`,
         or a tuple value like `(1, 0.5)` indicates the survival probability changes from `1 --> 0.5` for `top --> bottom` layers.
         A higher value means a higher probability will keep the conv branch.
     """
     inputs = Input(shape=input_shape)
-    out_channel = _make_divisible(24 * width_mult, 8)
-    nn = conv2d_no_bias(inputs, out_channel, (3, 3), strides=strides, padding="same")
+    out_channel = _make_divisible(24 * width_mul, 8)
+    nn = conv2d_no_bias(inputs, out_channel, (3, 3), strides=first_strides, padding="same")
     nn = batchnorm_with_activation(nn)
 
-    expand_ratios = [1, 4, 4, 4, 6, 6]
+    expands = [1, 4, 4, 4, 6, 6]
     out_channels = [24, 48, 64, 128, 160, 272]
     depths = [2, 4, 4, 6, 9, 15]
     strides = [1, 2, 2, 2, 1, 2]
@@ -147,15 +158,15 @@ def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, wi
     survivals = [survivals[int(sum(depths[:id])) : sum(depths[: id + 1])] for id in range(len(depths))]
 
     pre_out = out_channel
-    for expand_ratio, out_channel, depth, survival, stride, se in zip(expand_ratios, out_channels, depths, survivals, strides, use_ses):
-        out = _make_divisible(out_channel * width_mult, 8)
+    for expand, out_channel, depth, survival, stride, se in zip(expands, out_channels, depths, survivals, strides, use_ses):
+        out = _make_divisible(out_channel * width_mul, 8)
         for ii in range(depth):
             stride = stride if ii == 0 else 1
             shortcut = True if out == pre_out and stride == 1 else False
-            nn = MBConv(nn, out, stride, expand_ratio, shortcut, survival[ii], se)
+            nn = MBConv(nn, out, stride, expand, shortcut, survival[ii], se)
             pre_out = out
 
-    out = _make_divisible(1792 * width_mult, 8)
+    out = _make_divisible(1792 * width_mul, 8)
     nn = conv2d_no_bias(nn, out, (1, 1), strides=(1, 1), padding="valid")
     nn = batchnorm_with_activation(nn)
 
