@@ -116,9 +116,10 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None
         return nn
 
 
-def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, depth_mul=1, dropout=1, strides=2, survivals=None, name="EfficientNetV2"):
+def EfficientNetV2(input_shape=(224, 224, 3), include_top=True, classes=1000, width_mult=1, depth_mul=1, dropout=1, strides=2, survivals=0.8, name="EfficientNetV2"):
     """
-    survivals is used for StochasticDepth. Can be a constant value like `0.5` or `0.8`,
+    survivals is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
+        Can be a constant value like `0.5` or `0.8`,
         or a tuple value like `(1, 0.5)` indicates the survival probability changes from `1 --> 0.5` for `top --> bottom` layers.
         A higher value means a higher probability will keep the conv branch.
     """
