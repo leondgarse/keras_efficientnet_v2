@@ -124,15 +124,16 @@ def EfficientNetV2(
     depth_mul=1,
     dropout=1,
     first_strides=2,
-    survivals=0.8,
+    survivals=(1, 0.8),
     name="EfficientNetV2",
 ):
     """
     first_strides is used in the first Conv2D layer.
     survivals is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
         Can be a constant value like `0.5` or `0.8`,
-        or a tuple value like `(1, 0.5)` indicates the survival probability changes from `1 --> 0.5` for `top --> bottom` layers.
+        or a tuple value like `(1, 0.8)` indicates the survival probability linearly changes from `1 --> 0.8` for `top --> bottom` layers.
         A higher value means a higher probability will keep the conv branch.
+        or `None` to disable.
     """
     inputs = Input(shape=input_shape)
     out_channel = _make_divisible(24 * width_mul, 8)
