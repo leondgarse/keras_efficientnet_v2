@@ -137,17 +137,18 @@ def plot_hists(hists, names=None):
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
     for id, hist in enumerate(hists):
-        with open(hist, "r") as ff:
-            aa = json.load(ff)
+        if isinstance(hist, str):
+            with open(hist, "r") as ff:
+                hist = json.load(ff)
         name = names[id] if names != None else os.path.splitext(os.path.basename(hist))[0]
 
-        axes[0].plot(aa["loss"], label=name + " loss")
+        axes[0].plot(hist["loss"], label=name + " loss")
         color = axes[0].lines[-1].get_color()
-        axes[0].plot(aa["val_loss"], label=name + " val_loss", color=color, linestyle="--")
-        axes[1].plot(aa["accuracy"], label=name + " accuracy")
+        axes[0].plot(hist["val_loss"], label=name + " val_loss", color=color, linestyle="--")
+        axes[1].plot(hist["accuracy"], label=name + " accuracy")
         color = axes[1].lines[-1].get_color()
-        axes[1].plot(aa["val_accuracy"], label=name + " val_accuracy", color=color, linestyle="--")
-        axes[2].plot(aa["lr"], label=name + " lr")
+        axes[1].plot(hist["val_accuracy"], label=name + " val_accuracy", color=color, linestyle="--")
+        axes[2].plot(hist["lr"], label=name + " lr")
     for ax in axes:
         ax.legend()
         ax.grid()
