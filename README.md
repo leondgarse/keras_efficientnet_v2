@@ -3,18 +3,18 @@
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
-    | Model           | Top1 Acc. | ImageNet21K weight                                                                                            |
-    | --------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
-    | EfficientNetV2S | 83.9%     | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) |
-    | EfficientNetV2M | 85.2%     | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
-    | EfficientNetV2L | 85.7%     | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) |
+    | Model           | Params | ImageNet21K weight                                                                                            |
+    | --------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+    | EfficientNetV2S | 21.5M  | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) |
+    | EfficientNetV2M | 54.1M  | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
+    | EfficientNetV2L | 119.5M | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) |
 
-    | Model       | Top1 Acc. | ImageNet1K weight                 |
-    | ----------- | --------- | --------------------------------- |
-    | EffNetV2-B0 | 78.7%     | [efficientnetv2-b0-imagenet.h5]() |
-    | EffNetV2-B1 | 79.8%     | [efficientnetv2-b1-imagenet.h5]() |
-    | EffNetV2-B2 | 80.5%     | [efficientnetv2-b2-imagenet.h5]() |
-    | EffNetV2-B3 | 82.1%     | [efficientnetv2-b3-imagenet.h5]() |
+    | Model       | ImageNet1K Top1 Acc. | Params | ImageNet1K weight                 |
+    | ----------- | -------------------- | ------ | --------------------------------- |
+    | EffNetV2-B0 | 78.7%                | 7.1M   | [efficientnetv2-b0-imagenet.h5](Uploading) |
+    | EffNetV2-B1 | 79.8%                | 8.1M   | [efficientnetv2-b1-imagenet.h5](Uploading) |
+    | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](Uploading) |
+    | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](Uploading) |
 
   - **Exclude model top layers**
     ```py
@@ -35,8 +35,9 @@
     model.load_weights(ckpt)
     orign_out = model(tf.ones([1, 224, 224, 3]))[0]
 
-    # Converted EfficientNetV2S model. For ImageNet21k, dropout_rate=0.000001, survival_prob=1.0
-    # For survival_prob=0.8, should use `survivals=(1, 0.8)`
+    # Converted EfficientNetV2S model.
+    # For ImageNet21k, dropout_rate=0.000001, survival_prob=1.0
+    # For ImageNet, it's `dropout=0.2, survivals=(1, 0.8)`
     from Keras_efficientnet_v2_test import efficientnet_v2
     converted_model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
     converted_model.load_weights('models/efficientnetv2-s-21k.h5')

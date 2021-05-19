@@ -194,9 +194,9 @@ def EfficientNetV2(
     name="EfficientNetV2",
 ):
     """
-    model_type is the pre-defined model, value in ["s", "m", "l", "b0", "b1", "b2", "b3"].
-    first_strides is used in the first Conv2D layer.
-    survivals is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
+    model_type: is the pre-defined model, value in ["s", "m", "l", "b0", "b1", "b2", "b3"].
+    first_strides: is used in the first Conv2D layer.
+    survivals: is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
         Can be a constant value like `0.5` or `0.8`,
         or a tuple value like `(1, 0.8)` indicates the survival probability linearly changes from `1 --> 0.8` for `top --> bottom` layers.
         A higher value means a higher probability will keep the conv branch.
