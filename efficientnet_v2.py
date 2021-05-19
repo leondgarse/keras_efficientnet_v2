@@ -29,6 +29,63 @@ BATCH_NORM_EPSILON = 0.001
 CONV_KERNEL_INITIALIZER = keras.initializers.VarianceScaling(scale=2.0, mode="fan_out", distribution="truncated_normal")
 # CONV_KERNEL_INITIALIZER = 'glorot_uniform'
 
+BLOCK_CONFIGS = {
+    "b0": {
+        "first_conv_filter": 32,
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [16, 32, 48, 96, 112, 192],
+        "depths": [1, 2, 2, 3, 5, 8],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
+    "b1": {
+        "first_conv_filter": 32,
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [16, 32, 48, 96, 112, 192],
+        "depths": [2, 3, 3, 4, 6, 9],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
+    "b2": {
+        "first_conv_filter": 32,
+        "output_conv_filter": 1408,
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [16, 32, 56, 104, 120, 208],
+        "depths": [2, 3, 3, 4, 6, 10],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
+    "b3": {
+        "first_conv_filter": 40,
+        "output_conv_filter": 1536,
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [16, 40, 56, 112, 136, 232],
+        "depths": [2, 3, 3, 5, 7, 12],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
+    "s": {
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [24, 48, 64, 128, 160, 256],
+        "depths": [2, 4, 4, 6, 9, 15],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
+    "m": {
+        "expands": [1, 4, 4, 4, 6, 6, 6],
+        "out_channels": [24, 48, 80, 160, 176, 304, 512],
+        "depths": [3, 5, 5, 7, 14, 18, 5],
+        "strides": [1, 2, 2, 2, 1, 2, 1],
+        "use_ses": [0, 0, 0, 1, 1, 1, 1],
+    },
+    "l": {
+        "expands": [1, 4, 4, 4, 6, 6, 6],
+        "out_channels": [32, 64, 96, 192, 224, 384, 640],
+        "depths": [4, 7, 7, 10, 19, 25, 7],
+        "strides": [1, 2, 2, 2, 1, 2, 1],
+        "use_ses": [0, 0, 0, 1, 1, 1, 1],
+    },
+}
 
 def _make_divisible(v, divisor=4, min_value=None):
     """
@@ -127,7 +184,7 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None
 
 
 def EfficientNetV2(
-    blocks_config,
+    model_type="s",
     input_shape=(224, 224, 3),
     classes=1000,
     dropout=0.2,
@@ -137,6 +194,7 @@ def EfficientNetV2(
     name="EfficientNetV2",
 ):
     """
+    model_type is the pre-defined model, value in ["s", "m", "l", "b0", "b1", "b2", "b3"].
     first_strides is used in the first Conv2D layer.
     survivals is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
         Can be a constant value like `0.5` or `0.8`,
@@ -144,14 +202,17 @@ def EfficientNetV2(
         A higher value means a higher probability will keep the conv branch.
         or `None` to disable.
     """
+    blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
     out_channels = blocks_config["out_channels"]
     depths = blocks_config["depths"]
     strides = blocks_config["strides"]
     use_ses = blocks_config["use_ses"]
+    first_conv_filter = blocks_config.get('first_conv_filter', out_channels[0])
+    output_conv_filter = blocks_config.get('output_conv_filter', 1280)
 
     inputs = Input(shape=input_shape)
-    out_channel = _make_divisible(out_channels[0], 8)
+    out_channel = _make_divisible(first_conv_filter, 8)
     nn = conv2d_no_bias(inputs, out_channel, (3, 3), strides=first_strides, padding="same")
     nn = batchnorm_with_activation(nn)
 
@@ -175,8 +236,8 @@ def EfficientNetV2(
             nn = MBConv(nn, out, stride, expand, shortcut, survival[ii], se)
             pre_out = out
 
-    out = _make_divisible(1280, 8)
-    nn = conv2d_no_bias(nn, out, (1, 1), strides=(1, 1), padding="valid")
+    output_conv_filter = _make_divisible(output_conv_filter, 8)
+    nn = conv2d_no_bias(nn, output_conv_filter, (1, 1), strides=(1, 1), padding="valid")
     nn = batchnorm_with_activation(nn)
 
     if classes > 0:
@@ -196,14 +257,7 @@ def EfficientNetV2S(
     classifier_activation="softmax",
     name="EfficientNetV2S",
 ):
-    blocks_config = {
-        "expands": [1, 4, 4, 4, 6, 6],
-        "out_channels": [24, 48, 64, 128, 160, 256],
-        "depths": [2, 4, 4, 6, 9, 15],
-        "strides": [1, 2, 2, 2, 1, 2],
-        "use_ses": [0, 0, 0, 1, 1, 1],
-    }
-    return EfficientNetV2(**locals())
+    return EfficientNetV2(model_type="s", **locals())
 
 
 def EfficientNetV2M(
@@ -215,14 +269,7 @@ def EfficientNetV2M(
     classifier_activation="softmax",
     name="EfficientNetV2S",
 ):
-    blocks_config = {
-        "expands": [1, 4, 4, 4, 6, 6, 6],
-        "out_channels": [24, 48, 80, 160, 176, 304, 512],
-        "depths": [3, 5, 5, 7, 14, 18, 5],
-        "strides": [1, 2, 2, 2, 1, 2, 1],
-        "use_ses": [0, 0, 0, 1, 1, 1, 1],
-    }
-    return EfficientNetV2(**locals())
+    return EfficientNetV2(model_type="m", **locals())
 
 
 def EfficientNetV2L(
@@ -234,11 +281,4 @@ def EfficientNetV2L(
     classifier_activation="softmax",
     name="EfficientNetV2S",
 ):
-    blocks_config = {
-        "expands": [1, 4, 4, 4, 6, 6, 6],
-        "out_channels": [32, 64, 96, 192, 224, 384, 640],
-        "depths": [4, 7, 7, 10, 19, 25, 7],
-        "strides": [1, 2, 2, 2, 1, 2, 1],
-        "use_ses": [0, 0, 0, 1, 1, 1, 1],
-    }
-    return EfficientNetV2(**locals())
+    return EfficientNetV2(model_type="l", **locals())
