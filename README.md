@@ -3,7 +3,7 @@
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
-    | Model           | finetune ImageNet1K Top1 Acc. | Params | ImageNet21K weight                                                                                            |
+    | Model           | Finetuned ImageNet1K Top1 Acc. | Params | ImageNet21K weight                                                                                            |
     | --------------- | ----------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
     | EfficientNetV2S | 84.9%                         | 21.5M  | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) |
     | EfficientNetV2M | 86.2%                         | 54.1M  | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
