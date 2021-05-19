@@ -9,12 +9,12 @@
     | EfficientNetV2M | 54.1M  | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
     | EfficientNetV2L | 119.5M | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) |
 
-    | Model       | ImageNet1K Top1 Acc. | Params | ImageNet1K weight                 |
-    | ----------- | -------------------- | ------ | --------------------------------- |
-    | EffNetV2-B0 | 78.7%                | 7.1M   | [efficientnetv2-b0-imagenet.h5](Uploading) |
-    | EffNetV2-B1 | 79.8%                | 8.1M   | [efficientnetv2-b1-imagenet.h5](Uploading) |
-    | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](Uploading) |
-    | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](Uploading) |
+    | Model       | ImageNet1K Top1 Acc. | Params | ImageNet1K weight                                                                                                   | 
+    | ----------- | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+    | EffNetV2-B0 | 78.7%                | 7.1M   | [efficientnetv2-b0-imagenet.h5](https://drive.google.com/file/d/1OfOCQ_iDbRdk4WfN8yS_rZUDz4o62ZdD/view?usp=sharing) |
+    | EffNetV2-B1 | 79.8%                | 8.1M   | [efficientnetv2-b1-imagenet.h5](https://drive.google.com/file/d/18lEUbUeLstrEU59XHxDoFTsU-uDGBpTc/view?usp=sharing) |
+    | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://drive.google.com/file/d/1ROwAN9kfbGd4n3wm-s3shK9eXNsNOqIC/view?usp=sharing) |
+    | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://drive.google.com/file/d/1JTkakRMUp13JNz-5nFcaVOBZoKvCDpHj/view?usp=sharing) |
 
   - **Exclude model top layers**
     ```py
