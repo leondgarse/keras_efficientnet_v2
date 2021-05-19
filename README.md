@@ -11,6 +11,9 @@
     | EfficientNetV2L | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) | [efficientnetv2-l-21k-notop.h5](https://drive.google.com/file/d/1yNulcVfpB-0f1IoTF45RI_nJZzIl7c8A/view?usp=sharing) |
   - **Output compare**
     ```py
+    import tensorflow as tf
+    import numpy as np
+    
     # Original official efficientnetv2-s model
     import brain_automl.efficientnetv2.infer
     model = brain_automl.efficientnetv2.infer.create_model('efficientnetv2-s', 'imagenet21k')
