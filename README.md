@@ -1,15 +1,28 @@
 ## Keras_efficientnet_v2_test
 ***
-  - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2).
-  - Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
+  - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
-    | Model           | ImageNet21K weight | ImageNet21K weight no top |
-    | --------------- | ------------------ | ------------------------- |
-    | EfficientNetV2S | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) | [efficientnetv2-s-21k-notop.h5](https://drive.google.com/file/d/1bw79TEh4teW_HDtbnmiF42LmOjeeQXNU/view?usp=sharing) |
-    | EfficientNetV2M | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) | [efficientnetv2-m-21k-notop.h5](https://drive.google.com/file/d/1cxHyIMzHQZLqf1qfv0JFGHSfullOBsZt/view?usp=sharing) |
-    | EfficientNetV2L | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) | [efficientnetv2-l-21k-notop.h5](https://drive.google.com/file/d/1yNulcVfpB-0f1IoTF45RI_nJZzIl7c8A/view?usp=sharing) |
-  - **Output compare**
+    | Model           | Top1 Acc. | ImageNet21K weight                                                                                            |
+    | --------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+    | EfficientNetV2S | 83.9%     | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) |
+    | EfficientNetV2M | 85.2%     | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
+    | EfficientNetV2L | 85.7%     | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) |
+
+    | Model       | Top1 Acc. | ImageNet1K weight                 |
+    | ----------- | --------- | --------------------------------- |
+    | EffNetV2-B0 | 78.7%     | [efficientnetv2-b0-imagenet.h5]() |
+    | EffNetV2-B1 | 79.8%     | [efficientnetv2-b1-imagenet.h5]() |
+    | EffNetV2-B2 | 80.5%     | [efficientnetv2-b2-imagenet.h5]() |
+    | EffNetV2-B3 | 82.1%     | [efficientnetv2-b3-imagenet.h5]() |
+
+  - **Exclude model top layers**
+    ```py
+    model = tf.keras.models.load_model('efficientnetv2-s-21k.h5')
+    model_notop = tf.keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output)
+    model_notop.save('efficientnetv2-s-21k-notop.h5')
+    ```
+  - **Model verification**
     ```py
     import tensorflow as tf
     import numpy as np
@@ -34,7 +47,6 @@
     print('Allclose:', np.allclose(orign_out.numpy(), converted_out.numpy()))
     # Allclose: True
     ```
-  - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1QYfgaqEWwaOCsGnPsD9Xu5-8wNbrD6Dj?usp=sharing)
   - EfficientNetV2-S architecture
 
     | Stage | Operator               | Stride | #Channels | #Layers |
@@ -66,6 +78,7 @@
     - Mixup (Zhang et al., 2018)
     - Dropout (Srivastava et al., 2014)
     - and stochastic depth (Huang et al., 2016) with 0.8 survival probability
+  - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1QYfgaqEWwaOCsGnPsD9Xu5-8wNbrD6Dj?usp=sharing)
 ***
 
 ## Related Projects
