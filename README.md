@@ -26,7 +26,7 @@
     from Keras_efficientnet_v2_test import efficientnet_v2
     converted_model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
     converted_model.load_weights('models/efficientnetv2-s-21k.h5')
-    # Or just use: converted_model = keras.models.load_model('models/efficientnetv2-s-21k.h5')
+    # Or just use: converted_model = tf.keras.models.load_model('models/efficientnetv2-s-21k.h5')
     converted_out = converted_model(tf.ones([1, 224, 224, 3]))
 
     # Compare result
