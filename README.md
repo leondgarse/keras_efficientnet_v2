@@ -1,9 +1,15 @@
 ## Keras_efficientnet_v2_test
 ***
-  - [Official version](https://github.com/google/automl/tree/master/efficientnetv2) Updated!
-  - Creates an EfficientNetV2 Model using Tensorflow keras, as defined in [arXiv preprint arXiv:2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
-  - Follows implementation in [Github rosinality/vision-transformers-pytorch](https://github.com/rosinality/vision-transformers-pytorch/blob/main/models/efficientnet.py).
-  - Architecture only, haven't trained on imagenet.
+  - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2).
+  - Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
+  - `h5` model weights converted from official publication.
+
+    | Model           | ImageNet21K weight | ImageNet21K weight no top |
+    | --------------- | ------------------ | ------------------------- |
+    | EfficientNetV2S | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) | [efficientnetv2-s-21k-notop.h5](https://drive.google.com/file/d/1bw79TEh4teW_HDtbnmiF42LmOjeeQXNU/view?usp=sharing) |
+    | EfficientNetV2M | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) | [efficientnetv2-m-21k-notop.h5](https://drive.google.com/file/d/1cxHyIMzHQZLqf1qfv0JFGHSfullOBsZt/view?usp=sharing) |
+    | EfficientNetV2L | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) | [efficientnetv2-l-21k-notop.h5](https://drive.google.com/file/d/1yNulcVfpB-0f1IoTF45RI_nJZzIl7c8A/view?usp=sharing) |
+
   - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1QYfgaqEWwaOCsGnPsD9Xu5-8wNbrD6Dj?usp=sharing)
   - EfficientNetV2-S architecture
 
@@ -15,8 +21,8 @@
     | 3     | Fused-MBConv4, k3x3    | 2      | 64        | 4       |
     | 4     | MBConv4, k3x3, SE0.25  | 2      | 128       | 6       |
     | 5     | MBConv6, k3x3, SE0.25  | 1      | 160       | 9       |
-    | 6     | MBConv6, k3x3, SE0.25  | 2      | 272       | 15      |
-    | 7     | Conv1x1 & Pooling & FC | -      | 1792      | 1       |
+    | 6     | MBConv6, k3x3, SE0.25  | 2      | 256       | 15      |
+    | 7     | Conv1x1 & Pooling & FC | -      | 1280      | 1       |
 
   - Progressive training settings for EfficientNetV2
     |              | S min | S max | M min | M max | L min | M max |
@@ -40,7 +46,5 @@
 
 ## Related Projects
   - [tfa.layers.StochasticDepth](https://www.tensorflow.org/addons/api_docs/python/tfa/layers/StochasticDepth)
-  - [Github rosinality/vision-transformers-pytorch](https://github.com/rosinality/vision-transformers-pytorch/blob/main/models/efficientnet.py)
-  - [Github d-li14/efficientnetv2.pytorch](https://github.com/d-li14/efficientnetv2.pytorch)
-  - [Github jahongir7174/EffcientNetV2](https://github.com/jahongir7174/EffcientNetV2)
+  - [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2)
 ***
