@@ -22,7 +22,6 @@ from tensorflow.keras.layers import (
     Reshape,
     Multiply,
 )
-import math
 
 BATCH_NORM_DECAY = 0.9
 BATCH_NORM_EPSILON = 0.001
@@ -65,6 +64,8 @@ BLOCK_CONFIGS = {
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
     "s": {
+        "first_conv_filter": 24,
+        "output_conv_filter": 1280,
         "expands": [1, 4, 4, 4, 6, 6],
         "out_channels": [24, 48, 64, 128, 160, 256],
         "depths": [2, 4, 4, 6, 9, 15],
@@ -72,6 +73,8 @@ BLOCK_CONFIGS = {
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
     "m": {
+        "first_conv_filter": 24,
+        "output_conv_filter": 1280,
         "expands": [1, 4, 4, 4, 6, 6, 6],
         "out_channels": [24, 48, 80, 160, 176, 304, 512],
         "depths": [3, 5, 5, 7, 14, 18, 5],
@@ -79,6 +82,8 @@ BLOCK_CONFIGS = {
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
     },
     "l": {
+        "first_conv_filter": 32,
+        "output_conv_filter": 1280,
         "expands": [1, 4, 4, 4, 6, 6, 6],
         "out_channels": [32, 64, 96, 192, 224, 384, 640],
         "depths": [4, 7, 7, 10, 19, 25, 7],
@@ -86,6 +91,7 @@ BLOCK_CONFIGS = {
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
     },
 }
+
 
 def _make_divisible(v, divisor=4, min_value=None):
     """
@@ -141,10 +147,9 @@ def se_module(inputs, se_ratio=4):
     return Multiply()([inputs, se])
 
 
-def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None, use_se=0):
+def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None, use_se=0, is_fused=False):
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     input_channel = inputs.shape[channel_axis]
-    is_fused = use_se == 0
 
     if is_fused and expand_ratio != 1:
         nn = conv2d_no_bias(inputs, input_channel * expand_ratio, (3, 3), strides=stride, padding="same")
@@ -208,8 +213,8 @@ def EfficientNetV2(
     depths = blocks_config["depths"]
     strides = blocks_config["strides"]
     use_ses = blocks_config["use_ses"]
-    first_conv_filter = blocks_config.get('first_conv_filter', out_channels[0])
-    output_conv_filter = blocks_config.get('output_conv_filter', 1280)
+    first_conv_filter = blocks_config.get("first_conv_filter", out_channels[0])
+    output_conv_filter = blocks_config.get("output_conv_filter", 1280)
 
     inputs = Input(shape=input_shape)
     out_channel = _make_divisible(first_conv_filter, 8)
@@ -230,10 +235,11 @@ def EfficientNetV2(
     pre_out = out_channel
     for expand, out_channel, depth, survival, stride, se in zip(expands, out_channels, depths, survivals, strides, use_ses):
         out = _make_divisible(out_channel, 8)
+        is_fused = True if se == 0 else False
         for ii in range(depth):
             stride = stride if ii == 0 else 1
             shortcut = True if out == pre_out and stride == 1 else False
-            nn = MBConv(nn, out, stride, expand, shortcut, survival[ii], se)
+            nn = MBConv(nn, out, stride, expand, shortcut, survival[ii], se, is_fused)
             pre_out = out
 
     output_conv_filter = _make_divisible(output_conv_filter, 8)

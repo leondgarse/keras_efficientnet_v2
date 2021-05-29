@@ -4,10 +4,10 @@
   - `h5` model weights converted from official publication.
 
     | Model           | Finetuned ImageNet1K Top1 Acc. | Params | ImageNet21K weight                                                                                            |
-    | --------------- | ----------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
-    | EfficientNetV2S | 84.9%                         | 21.5M  | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) |
-    | EfficientNetV2M | 86.2%                         | 54.1M  | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
-    | EfficientNetV2L | 86.9%                         | 119.5M | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) |
+    | --------------- | ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
+    | EfficientNetV2S | 84.9%                          | 21.5M  | [efficientnetv2-s-21k.h5](https://drive.google.com/file/d/1onSbAdvSYuvZzDdEg1rAXs7UIIR-cutB/view?usp=sharing) |
+    | EfficientNetV2M | 86.2%                          | 54.1M  | [efficientnetv2-m-21k.h5](https://drive.google.com/file/d/1lXERhhTczTl5RJDJ8JfC6WlZr103MQxp/view?usp=sharing) |
+    | EfficientNetV2L | 86.9%                          | 119.5M | [efficientnetv2-l-21k.h5](https://drive.google.com/file/d/1apIx_tNxworcMhWFK384RNdLDCvuQ4o3/view?usp=sharing) |
 
     | Model       | ImageNet1K Top1 Acc. | Params | ImageNet1K weight                                                                                                   |
     | ----------- | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
@@ -19,6 +19,7 @@
   - **Exclude model top layers**
     ```py
     model = tf.keras.models.load_model('efficientnetv2-s-21k.h5')
+    # Output layer is `-3` without dropout layer
     model_notop = tf.keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output)
     model_notop.save('efficientnetv2-s-21k-notop.h5')
     ```
