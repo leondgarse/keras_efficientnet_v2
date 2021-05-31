@@ -41,7 +41,7 @@
     - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py)
       - Delete some `names`, as they may cause confliction in keras.
       - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
-      - Just use `Add` layer instead of `utils.drop_connect`, as this will be easier to convert. We can add them back using `tensorflow_addons.layers.StochasticDepth` if needed.
+      - Just use `Add` layer instead of `utils.drop_connect`, as when `is_training=False`, `utils.drop_connect` functions like `Add`.
       - Add a `num_classes` parameter outside of `mconfig`.
     - Clone repos and download pre-trained models
       ```sh
@@ -52,6 +52,7 @@
       ```
     - **Procedure**
       ```py
+      import sys
       import tensorflow as tf
       import numpy as np
       from tensorflow import keras
@@ -89,8 +90,6 @@
 
       """ Reload bb.h5 using full keras defined model """
       import efficientnet_v2
-      # For ImageNet21k, dropout_rate=0.000001, survival_prob=1.0
-      # For ImageNet, dropout=0.2, survivals=(1, 0.8)
       keras_model = efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
       keras_model.load_weights('bb.h5')
 
