@@ -37,8 +37,8 @@ class RandomProcessImage:
         return input_image, label
 
 
-def init_dataset(target_shape=(300, 300), batch_size=64, buffer_size=1000, info_only=False, magnitude=0, keep_shape=False):
-    dataset, info = tfds.load("food101", with_info=True)
+def init_dataset(data_name="food101", target_shape=(300, 300), batch_size=64, buffer_size=1000, info_only=False, magnitude=0, keep_shape=False):
+    dataset, info = tfds.load(data_name, with_info=True)
     num_classes = info.features["label"].num_classes
     total_images = info.splits["train"].num_examples
     if info_only:
@@ -48,7 +48,10 @@ def init_dataset(target_shape=(300, 300), batch_size=64, buffer_size=1000, info_
     train_process = RandomProcessImage(target_shape, magnitude, keep_shape=keep_shape)
     train = dataset["train"].map(lambda xx: train_process(xx), num_parallel_calls=AUTOTUNE)
     test_process = RandomProcessImage(target_shape, magnitude=-1, keep_shape=keep_shape)
-    test = dataset["validation"].map(lambda xx: test_process(xx))
+    if "validation" in dataset:
+        test = dataset["validation"].map(lambda xx: test_process(xx))
+    elif "test" in dataset:
+        test = dataset["test"].map(lambda xx: test_process(xx))
 
     as_one_hot = lambda xx, yy: (xx, tf.one_hot(yy, num_classes))
     train_dataset = train.shuffle(buffer_size).batch(batch_size).map(as_one_hot).prefetch(buffer_size=AUTOTUNE)
