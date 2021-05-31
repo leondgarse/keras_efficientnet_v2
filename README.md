@@ -16,6 +16,20 @@
     | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://drive.google.com/file/d/1ROwAN9kfbGd4n3wm-s3shK9eXNsNOqIC/view?usp=sharing) |
     | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://drive.google.com/file/d/1JTkakRMUp13JNz-5nFcaVOBZoKvCDpHj/view?usp=sharing) |
 
+  - **Usage**
+    ```py
+    # Load directly
+    model = tf.keras.models.load_model('models/efficientnetv2-s-21k.h5')
+
+    # Define model and load weight
+    # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]
+    import efficientnet_v2
+    model = efficientnet_v2.EfficientNetV2(model_type="b0", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
+    model.load_weights('models/efficientnetv2-b0-imagenet.h5')
+
+    # EfficientNetV2S / EfficientNetV2M / EfficientNetV2L are also added just with the relative model_type
+    model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
+    ```
   - **Exclude model top layers**
     ```py
     model = tf.keras.models.load_model('efficientnetv2-s-21k.h5')
@@ -23,32 +37,73 @@
     model_notop = tf.keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output)
     model_notop.save('efficientnetv2-s-21k-notop.h5')
     ```
-  - **Model verification**
-    ```py
-    import tensorflow as tf
-    import numpy as np
+  - **Detailed conversion procedure**
+    - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py)
+      - Delete some `names`, as they may cause confliction in keras.
+      - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
+      - Just use `Add` layer instead of `utils.drop_connect`, as this will be easier to convert. We can add them back using `tensorflow_addons.layers.StochasticDepth` if needed.
+      - Add a `num_classes` parameter outside of `mconfig`.
+    - Clone repos and download pre-trained models
+      ```sh
+      .
+      ├── automl  # Official repo
+      ├── Keras_efficientnet_v2_test  # This one
+      ├── models  # Downloaded and extracted models
+      ```
+    - **Procedure**
+      ```py
+      import tensorflow as tf
+      import numpy as np
+      from tensorflow import keras
 
-    # Original official efficientnetv2-s model
-    import brain_automl.efficientnetv2.infer
-    model = brain_automl.efficientnetv2.infer.create_model('efficientnetv2-s', 'imagenet21k')
-    len(model(tf.ones([1, 224, 224, 3]), False))
-    ckpt = tf.train.latest_checkpoint('models/efficientnetv2-s-21k')
-    model.load_weights(ckpt)
-    orign_out = model(tf.ones([1, 224, 224, 3]))[0]
+      """ Parameters """
+      model_type, dataset = 's', "imagenet21k"
+      if dataset == "imagenet21k":
+          classes, dropout, load_model_suffix, save_model_suffix = 21843, 1e-6, "-21k", "-21k"
+      else:
+          classes, dropout, load_model_suffix, save_model_suffix = 1000, 0.2, "", "-imagenet"
 
-    # Converted EfficientNetV2S model.
-    # For ImageNet21k, dropout_rate=0.000001, survival_prob=1.0
-    # For ImageNet, it's `dropout=0.2, survivals=(1, 0.8)`
-    from Keras_efficientnet_v2_test import efficientnet_v2
-    converted_model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
-    converted_model.load_weights('models/efficientnetv2-s-21k.h5')
-    # Or just use: converted_model = tf.keras.models.load_model('models/efficientnetv2-s-21k.h5')
-    converted_out = converted_model(tf.ones([1, 224, 224, 3]))
+      """ Load checkpoints using official defination """
+      sys.path.append('automl/efficientnetv2')
+      import infer, effnetv2_model
+      config = infer.get_config('efficientnetv2-{}'.format(model_type), dataset)
+      model = effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), config.model)
+      len(model(tf.ones([1, 224, 224, 3]), False))
+      ckpt = tf.train.latest_checkpoint('models/efficientnetv2-{}{}'.format(model_type, load_model_suffix))
+      model.load_weights(ckpt)
 
-    # Compare result
-    print('Allclose:', np.allclose(orign_out.numpy(), converted_out.numpy()))
-    # Allclose: True
-    ```
+      """ Save h5 weights if no error happens """
+      model.save_weights('aa.h5')
+
+      """ Reload weights with the modified version """
+      sys.path.append("Keras_efficientnet_v2_test")
+      import convert_effnetv2_model
+      mm = convert_effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
+      len(mm(tf.ones([1, 224, 224, 3]), False))
+      mm.load_weights('aa.h5')
+
+      """ Define a new model using `mm.call`, as mm is a subclassed model, cannot be saved as h5 """
+      inputs = keras.Input([224, 224, 3])
+      tt = keras.models.Model(inputs, mm.call(inputs, training=False))
+      tt.save('bb.h5')  # This is already a converted one.
+
+      """ Reload bb.h5 using full keras defined model """
+      import efficientnet_v2
+      # For ImageNet21k, dropout_rate=0.000001, survival_prob=1.0
+      # For ImageNet, dropout=0.2, survivals=(1, 0.8)
+      keras_model = efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
+      keras_model.load_weights('bb.h5')
+
+      """ Output verification """
+      orign_out = model(tf.ones([1, 224, 224, 3]))[0]
+      converted_out = keras_model(tf.ones([1, 224, 224, 3]))
+      print('Allclose:', np.allclose(orign_out.numpy(), converted_out.numpy()))
+      # Allclose: True
+
+      """ Save model and notop version """
+      keras_model.save('models/efficientnetv2-{}{}.h5'.format(model_type, save_model_suffix))
+      keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save('models/efficientnetv2-{}{}-notop.h5'.format(model_type, save_model_suffix))
+      ```
   - EfficientNetV2-S architecture
 
     | Stage | Operator               | Stride | #Channels | #Layers |
