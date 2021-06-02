@@ -1,15 +1,15 @@
-## Table of Contents
+# Table of Contents
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-	- [Table of Contents](#table-of-contents)
-	- [Basic usage](#basic-usage)
-	- [Detailed conversion procedure](#detailed-conversion-procedure)
-	- [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
-	- [Related Projects](#related-projects)
+- [Table of Contents](#table-of-contents)
+- [Basic usage](#basic-usage)
+- [Detailed conversion procedure](#detailed-conversion-procedure)
+- [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
+- [Related Projects](#related-projects)
 
 <!-- /TOC -->
 ***
-## Basic usage
+# Basic usage
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
@@ -78,7 +78,7 @@
     - Mixup (Zhang et al., 2018)
     - Dropout (Srivastava et al., 2014)
     - and stochastic depth (Huang et al., 2016) with 0.8 survival probability
-## Detailed conversion procedure
+# Detailed conversion procedure
   - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py)
     - Delete some `names`, as they may cause confliction in keras.
     - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
@@ -144,7 +144,7 @@
     keras_model.save('models/efficientnetv2-{}{}.h5'.format(model_type, save_model_suffix))
     keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save('models/efficientnetv2-{}{}-notop.h5'.format(model_type, save_model_suffix))
     ```
-## Progressive train test on cifar10
+# Progressive train test on cifar10
   - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1vmAEfF9tUgK2gkrS5qVftadTyUcX343D?usp=sharing)
   ```py
   # Exclude model top layers first
@@ -191,7 +191,7 @@
   ![](cifar10_progressive_train.svg)
 ***
 
-## Related Projects
+# Related Projects
   - [tfa.layers.StochasticDepth](https://www.tensorflow.org/addons/api_docs/python/tfa/layers/StochasticDepth)
   - [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2)
 ***
