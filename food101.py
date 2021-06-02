@@ -6,6 +6,7 @@ import numpy as np
 class RandomProcessImage:
     def __init__(self, target_shape=(300, 300), magnitude=0, keep_shape=False):
         self.target_shape, self.magnitude, self.keep_shape = target_shape, magnitude, keep_shape
+        self.target_shape = target_shape if len(target_shape) == 2 else target_shape[:2]
         if magnitude > 0:
             import augment
 
@@ -133,25 +134,26 @@ def model_validation_3(model, batch_size=64):
     return voted_classes, voted_values, labels
 
 
-def plot_hists(hists, names=None):
+def plot_hists(hists, names=None, base_size=6):
     import os
     import json
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+    fig, axes = plt.subplots(1, 2, figsize=(2 * base_size, base_size))
     for id, hist in enumerate(hists):
+        name = names[id] if names != None else None
         if isinstance(hist, str):
+            name = name if name != None else os.path.splitext(os.path.basename(hist))[0]
             with open(hist, "r") as ff:
                 hist = json.load(ff)
-        name = names[id] if names != None else os.path.splitext(os.path.basename(hist))[0]
+        name = name if name != None else str(id)
 
         axes[0].plot(hist["loss"], label=name + " loss")
         color = axes[0].lines[-1].get_color()
         axes[0].plot(hist["val_loss"], label=name + " val_loss", color=color, linestyle="--")
-        axes[1].plot(hist["accuracy"], label=name + " accuracy")
+        axes[1].plot(hist["accuracy" if "accuracy" in hist else "acc"], label=name + " accuracy")
         color = axes[1].lines[-1].get_color()
-        axes[1].plot(hist["val_accuracy"], label=name + " val_accuracy", color=color, linestyle="--")
-        axes[2].plot(hist["lr"], label=name + " lr")
+        axes[1].plot(hist["val_accuracy" if "val_accuracy" in hist else "val_acc"], label=name + " val_accuracy", color=color, linestyle="--")
     for ax in axes:
         ax.legend()
         ax.grid()

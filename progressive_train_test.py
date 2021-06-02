@@ -19,16 +19,19 @@ def exp_scheduler(epoch, lr_base=0.256, decay_step=2.4, decay_rate=0.97, lr_min=
 
 def progressive_with_dropout_randaug(
     compiled_model,
+    data_name="cifar10",
     lr_scheduler=None,
     total_epochs=36,
-    stages=1,
+    batch_size=64,
     target_shapes=[128],
     dropouts=[0.4],
-    dropout_layer=-3,
+    dropout_layer=-2,
     magnitudes=[0],
 ):
     histories = []
+    stages = min([len(target_shapes), len(dropouts), len(magnitudes)])
     for stage, target_shape, dropout, magnitude in zip(range(stages), target_shapes, dropouts, magnitudes):
+        print(">>>> stage: {}/{}, target_shape: {}, dropout: {}, magnitude: {}".format(stage + 1, stages, target_shape, dropout, magnitude))
         if len(dropouts) > 1 and isinstance(model.layers[dropout_layer], keras.layers.Dropout):
             print(">>>> Changing dropout rate to:", dropout)
             model.layers[dropout_layer].rate = dropout
@@ -37,8 +40,8 @@ def progressive_with_dropout_randaug(
             # model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
 
         target_shape = (target_shape, target_shape)
-        train_dataset, test_dataset, total_images, num_classes = food101.init_dataset(
-            target_shape=target_shape, magnitude=magnitude, keep_shape=True
+        train_dataset, test_dataset, total_images, num_classes = init_dataset(
+            data_name=data_name, target_shape=target_shape, batch_size=batch_size, magnitude=magnitude, keep_shape=True
         )
 
         initial_epoch = stage * total_epochs // stages
@@ -48,7 +51,7 @@ def progressive_with_dropout_randaug(
             epochs=epochs,
             initial_epoch=initial_epoch,
             validation_data=test_dataset,
-            callbacks=[lr_scheduler],
+            callbacks=[lr_scheduler] if lr_scheduler is not None else [],
         )
         histories.append(history)
     hhs = {kk: np.ravel([hh.history[kk] for hh in histories]).astype("float").tolist() for kk in history.history.keys()}
@@ -137,8 +140,32 @@ elif __name__ == "__train_test__":
         model,
         lr_scheduler,
         52,
-        stages=4,
         target_shapes=[128, 185, 242, 300],
         dropouts=[0.1, 0.2, 0.3, 0.4],
         magnitudes=[5, 8, 12, 15],
     )
+elif __name__ == "__test_again__":
+    import json
+    import tensorflow_addons as tfa
+    from icecream import ic
+    import efficientnet_v2
+    import food101
+
+    keras.mixed_precision.set_global_policy("mixed_float16")
+
+    input_shape = (224, 224, 3)
+    batch_size = 64
+    train_dataset, test_dataset, total_images, num_classes = food101.init_dataset(data_name="cifar10", target_shape=input_shape, batch_size=batch_size, magnitude=15)
+
+    eb2s = eb2s = efficientnet_v2.EfficientNetV2("s", input_shape=(224, 224, 3), classes=0)
+    eb2s.load_weights("../models/efficientnetv2-s-21k.h5", by_name=True)
+    out = eb2s.output
+
+    nn = keras.layers.GlobalAveragePooling2D(name="avg_pool")(out)
+    nn = keras.layers.Dense(num_classes, activation="softmax", name="predictions")(nn)
+    eb2_imagenet = keras.models.Model(eb2s.inputs[0], nn)
+
+    eb2_imagenet.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['acc'])
+    history_eb2_imagenet = eb2_imagenet.fit(train_dataset, epochs=15, validation_data=test_dataset)
+    with open("history_eb2_imagenet.json", "w") as ff:
+        json.dump(history_eb2_imagenet.history, ff)
