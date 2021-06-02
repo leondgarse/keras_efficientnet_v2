@@ -180,7 +180,7 @@
       total_epochs=36,
       batch_size=64,
       dropout_layer=-2,
-      target_shapes=[128, 160, 192, 224],
+      target_shapes=[128, 160, 192, 224], # [128, 185, 242, 300] for final shape (300, 300)
       dropouts=[0.1, 0.2, 0.3, 0.4],
       magnitudes=[5, 8, 12, 15],
   )

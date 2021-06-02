@@ -33,7 +33,7 @@ BLOCK_CONFIGS = {
         "first_conv_filter": 32,
         "expands": [1, 4, 4, 4, 6, 6],
         "out_channels": [16, 32, 48, 96, 112, 192],
-        "depths": [1, 2, 2, 3, 5, 8],
+        "depthes": [1, 2, 2, 3, 5, 8],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
@@ -41,7 +41,7 @@ BLOCK_CONFIGS = {
         "first_conv_filter": 32,
         "expands": [1, 4, 4, 4, 6, 6],
         "out_channels": [16, 32, 48, 96, 112, 192],
-        "depths": [2, 3, 3, 4, 6, 9],
+        "depthes": [2, 3, 3, 4, 6, 9],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
@@ -50,7 +50,7 @@ BLOCK_CONFIGS = {
         "output_conv_filter": 1408,
         "expands": [1, 4, 4, 4, 6, 6],
         "out_channels": [16, 32, 56, 104, 120, 208],
-        "depths": [2, 3, 3, 4, 6, 10],
+        "depthes": [2, 3, 3, 4, 6, 10],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
@@ -59,7 +59,7 @@ BLOCK_CONFIGS = {
         "output_conv_filter": 1536,
         "expands": [1, 4, 4, 4, 6, 6],
         "out_channels": [16, 40, 56, 112, 136, 232],
-        "depths": [2, 3, 3, 5, 7, 12],
+        "depthes": [2, 3, 3, 5, 7, 12],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
@@ -68,7 +68,7 @@ BLOCK_CONFIGS = {
         "output_conv_filter": 1280,
         "expands": [1, 4, 4, 4, 6, 6],
         "out_channels": [24, 48, 64, 128, 160, 256],
-        "depths": [2, 4, 4, 6, 9, 15],
+        "depthes": [2, 4, 4, 6, 9, 15],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
@@ -77,7 +77,7 @@ BLOCK_CONFIGS = {
         "output_conv_filter": 1280,
         "expands": [1, 4, 4, 4, 6, 6, 6],
         "out_channels": [24, 48, 80, 160, 176, 304, 512],
-        "depths": [3, 5, 5, 7, 14, 18, 5],
+        "depthes": [3, 5, 5, 7, 14, 18, 5],
         "strides": [1, 2, 2, 2, 1, 2, 1],
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
     },
@@ -86,7 +86,7 @@ BLOCK_CONFIGS = {
         "output_conv_filter": 1280,
         "expands": [1, 4, 4, 4, 6, 6, 6],
         "out_channels": [32, 64, 96, 192, 224, 384, 640],
-        "depths": [4, 7, 7, 10, 19, 25, 7],
+        "depthes": [4, 7, 7, 10, 19, 25, 7],
         "strides": [1, 2, 2, 2, 1, 2, 1],
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
     },
@@ -210,7 +210,7 @@ def EfficientNetV2(
     blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
     out_channels = blocks_config["out_channels"]
-    depths = blocks_config["depths"]
+    depthes = blocks_config["depthes"]
     strides = blocks_config["strides"]
     use_ses = blocks_config["use_ses"]
     first_conv_filter = blocks_config.get("first_conv_filter", out_channels[0])
@@ -222,7 +222,7 @@ def EfficientNetV2(
     nn = batchnorm_with_activation(nn)
 
     # StochasticDepth survival_probability values
-    total_layers = sum(depths)
+    total_layers = sum(depthes)
     if isinstance(survivals, float):
         survivals = [survivals] * total_layers
     elif isinstance(survivals, (list, tuple)) and len(survivals) == 2:
@@ -230,10 +230,10 @@ def EfficientNetV2(
         survivals = [start - (1 - end) * float(ii) / total_layers for ii in range(total_layers)]
     else:
         survivals = [None] * total_layers
-    survivals = [survivals[int(sum(depths[:id])) : sum(depths[: id + 1])] for id in range(len(depths))]
+    survivals = [survivals[int(sum(depthes[:id])) : sum(depthes[: id + 1])] for id in range(len(depthes))]
 
     pre_out = out_channel
-    for expand, out_channel, depth, survival, stride, se in zip(expands, out_channels, depths, survivals, strides, use_ses):
+    for expand, out_channel, depth, survival, stride, se in zip(expands, out_channels, depthes, survivals, strides, use_ses):
         out = _make_divisible(out_channel, 8)
         is_fused = True if se == 0 else False
         for ii in range(depth):
@@ -288,3 +288,7 @@ def EfficientNetV2L(
     name="EfficientNetV2S",
 ):
     return EfficientNetV2(model_type="l", **locals())
+
+def get_actual_survival_probabilities(model):
+    from tensorflow_addons.layers import StochasticDepth
+    return [ii.survival_probability for ii in model.layers if isinstance(ii, StochasticDepth)]
