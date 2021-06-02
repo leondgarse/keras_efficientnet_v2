@@ -1,5 +1,15 @@
-## Keras_efficientnet_v2_test
+## Table of Contents
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+	- [Table of Contents](#table-of-contents)
+	- [Basic usage](#basic-usage)
+	- [Detailed conversion procedure](#detailed-conversion-procedure)
+	- [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
+	- [Related Projects](#related-projects)
+
+<!-- /TOC -->
 ***
+## Basic usage
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
@@ -19,13 +29,13 @@
   - **Usage**
     ```py
     # Load directly
-    model = tf.keras.models.load_model('models/efficientnetv2-s-21k.h5')
+    model = tf.keras.models.load_model('../models/efficientnetv2-s-21k.h5')
 
     # Define model and load weight
     # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]
     import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2(model_type="b0", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
-    model.load_weights('models/efficientnetv2-b0-imagenet.h5')
+    model.load_weights('../models/efficientnetv2-b0-imagenet.h5')
 
     # EfficientNetV2S / EfficientNetV2M / EfficientNetV2L are also added just with the relative model_type
     model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
@@ -37,72 +47,6 @@
     model_notop = tf.keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output)
     model_notop.save('efficientnetv2-s-21k-notop.h5')
     ```
-  - **Detailed conversion procedure**
-    - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py)
-      - Delete some `names`, as they may cause confliction in keras.
-      - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
-      - Just use `Add` layer instead of `utils.drop_connect`, as when `is_training=False`, `utils.drop_connect` functions like `Add`.
-      - Add a `num_classes` parameter outside of `mconfig`.
-    - Clone repos and download pre-trained models
-      ```sh
-      .
-      ├── automl  # Official repo
-      ├── Keras_efficientnet_v2_test  # This one
-      ├── models  # Downloaded and extracted models
-      ```
-    - **Procedure**
-      ```py
-      import sys
-      import tensorflow as tf
-      import numpy as np
-      from tensorflow import keras
-
-      """ Parameters """
-      model_type, dataset = 's', "imagenet21k"
-      if dataset == "imagenet21k":
-          classes, dropout, load_model_suffix, save_model_suffix = 21843, 1e-6, "-21k", "-21k"
-      else:
-          classes, dropout, load_model_suffix, save_model_suffix = 1000, 0.2, "", "-imagenet"
-
-      """ Load checkpoints using official defination """
-      sys.path.append('automl/efficientnetv2')
-      import infer, effnetv2_model
-      config = infer.get_config('efficientnetv2-{}'.format(model_type), dataset)
-      model = effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), config.model)
-      len(model(tf.ones([1, 224, 224, 3]), False))
-      ckpt = tf.train.latest_checkpoint('models/efficientnetv2-{}{}'.format(model_type, load_model_suffix))
-      model.load_weights(ckpt)
-
-      """ Save h5 weights if no error happens """
-      model.save_weights('aa.h5')
-
-      """ Reload weights with the modified version """
-      sys.path.append("Keras_efficientnet_v2_test")
-      import convert_effnetv2_model
-      mm = convert_effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
-      len(mm(tf.ones([1, 224, 224, 3]), False))
-      mm.load_weights('aa.h5')
-
-      """ Define a new model using `mm.call`, as mm is a subclassed model, cannot be saved as h5 """
-      inputs = keras.Input([224, 224, 3])
-      tt = keras.models.Model(inputs, mm.call(inputs, training=False))
-      tt.save('bb.h5')  # This is already a converted one.
-
-      """ Reload bb.h5 using full keras defined model """
-      import efficientnet_v2
-      keras_model = efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
-      keras_model.load_weights('bb.h5')
-
-      """ Output verification """
-      orign_out = model(tf.ones([1, 224, 224, 3]))[0]
-      converted_out = keras_model(tf.ones([1, 224, 224, 3]))
-      print('Allclose:', np.allclose(orign_out.numpy(), converted_out.numpy()))
-      # Allclose: True
-
-      """ Save model and notop version """
-      keras_model.save('models/efficientnetv2-{}{}.h5'.format(model_type, save_model_suffix))
-      keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save('models/efficientnetv2-{}{}-notop.h5'.format(model_type, save_model_suffix))
-      ```
   - EfficientNetV2-S architecture
 
     | Stage | Operator               | Stride | #Channels | #Layers |
@@ -134,7 +78,117 @@
     - Mixup (Zhang et al., 2018)
     - Dropout (Srivastava et al., 2014)
     - and stochastic depth (Huang et al., 2016) with 0.8 survival probability
+## Detailed conversion procedure
+  - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py)
+    - Delete some `names`, as they may cause confliction in keras.
+    - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
+    - Just use `Add` layer instead of `utils.drop_connect`, as when `is_training=False`, `utils.drop_connect` functions like `Add`.
+    - Add a `num_classes` parameter outside of `mconfig`.
+  - Clone repos and download pre-trained models
+    ```sh
+    .
+    ├── automl  # Official repo
+    ├── Keras_efficientnet_v2_test  # This one
+    ├── models  # Downloaded and extracted models
+    ```
+  - **Procedure**
+    ```py
+    import sys
+    import tensorflow as tf
+    import numpy as np
+    from tensorflow import keras
+
+    """ Parameters """
+    model_type, dataset = 's', "imagenet21k"
+    if dataset == "imagenet21k":
+        classes, dropout, load_model_suffix, save_model_suffix = 21843, 1e-6, "-21k", "-21k"
+    else:
+        classes, dropout, load_model_suffix, save_model_suffix = 1000, 0.2, "", "-imagenet"
+
+    """ Load checkpoints using official defination """
+    sys.path.append('automl/efficientnetv2')
+    import infer, effnetv2_model
+    config = infer.get_config('efficientnetv2-{}'.format(model_type), dataset)
+    model = effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), config.model)
+    len(model(tf.ones([1, 224, 224, 3]), False))
+    ckpt = tf.train.latest_checkpoint('models/efficientnetv2-{}{}'.format(model_type, load_model_suffix))
+    model.load_weights(ckpt)
+
+    """ Save h5 weights if no error happens """
+    model.save_weights('aa.h5')
+
+    """ Reload weights with the modified version """
+    sys.path.append("Keras_efficientnet_v2_test")
+    import convert_effnetv2_model
+    mm = convert_effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
+    len(mm(tf.ones([1, 224, 224, 3]), False))
+    mm.load_weights('aa.h5')
+
+    """ Define a new model using `mm.call`, as mm is a subclassed model, cannot be saved as h5 """
+    inputs = keras.Input([224, 224, 3])
+    tt = keras.models.Model(inputs, mm.call(inputs, training=False))
+    tt.save('bb.h5')  # This is already a converted one.
+
+    """ Reload bb.h5 using full keras defined model """
+    import efficientnet_v2
+    keras_model = efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
+    keras_model.load_weights('bb.h5')
+
+    """ Output verification """
+    orign_out = model(tf.ones([1, 224, 224, 3]))[0]
+    converted_out = keras_model(tf.ones([1, 224, 224, 3]))
+    print('Allclose:', np.allclose(orign_out.numpy(), converted_out.numpy()))
+    # Allclose: True
+
+    """ Save model and notop version """
+    keras_model.save('models/efficientnetv2-{}{}.h5'.format(model_type, save_model_suffix))
+    keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save('models/efficientnetv2-{}{}-notop.h5'.format(model_type, save_model_suffix))
+    ```
+## Progressive train test on cifar10
   - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1vmAEfF9tUgK2gkrS5qVftadTyUcX343D?usp=sharing)
+  ```py
+  # Exclude model top layers first
+  model = tf.keras.models.load_model('../models/efficientnetv2-s-21k.h5')
+  # Output layer is `-3` without dropout layer
+  model_notop = tf.keras.models.Model(model.inputs[0], model.layers[-4].output)
+  model_notop.save('../models/efficientnetv2-s-21k-notop.h5')
+  ```
+  ```py
+  from tensorflow import keras
+  import progressive_train_test
+  import efficientnet_v2
+
+  num_classes = 10
+  ev2_s = efficientnet_v2.EfficientNetV2("s", input_shape=(None, None, 3), classes=0)
+  ev2_s.load_weights("../models/efficientnetv2-s-21k-notop.h5")
+  out = ev2_s.output
+
+  nn = keras.layers.GlobalAveragePooling2D(name="avg_pool")(out)
+  nn = keras.layers.Dropout(0.1)(nn)
+  nn = keras.layers.Dense(num_classes, activation="softmax", name="predictions", dtype="float32")(nn)
+  model = keras.models.Model(ev2_s.inputs[0], nn)
+
+  lr_scheduler = None
+  optimizer = "adam"
+  loss = "categorical_crossentropy"
+  model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
+
+  hhs = progressive_train_test.progressive_with_dropout_randaug(
+      model,
+      data_name="cifar10",
+      lr_scheduler=lr_scheduler,
+      total_epochs=36,
+      batch_size=64,
+      dropout_layer=-2,
+      target_shapes=[128, 160, 192, 224],
+      dropouts=[0.1, 0.2, 0.3, 0.4],
+      magnitudes=[5, 8, 12, 15],
+  )
+
+  with open("history_ev2s_imagenet_progressive_224.json", "w") as ff:
+      json.dump(hhs, ff)
+  ```
+  ![](cifar10_progressive_train.svg)
 ***
 
 ## Related Projects
