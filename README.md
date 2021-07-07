@@ -30,22 +30,42 @@
     ```py
     # Load directly
     model = tf.keras.models.load_model('../models/efficientnetv2-s-21k.h5')
-
-    # Define model and load weight
+    ```
+    Or define model and load weights
+    ```py
     # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]
     import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2(model_type="b0", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
     model.load_weights('../models/efficientnetv2-b0-imagenet.h5')
-
-    # EfficientNetV2S / EfficientNetV2M / EfficientNetV2L are also added just with the relative model_type
+    ```
+    `EfficientNetV2S` / `EfficientNetV2M` / `EfficientNetV2L` are also added just with the relative `model_type`
+    ```py
     model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
     ```
   - **Exclude model top layers**
+    ```py
+    # Load weights with `by_name=True`
+    import efficientnet_v2
+    model = efficientnet_v2.EfficientNetV2M(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0)
+    model.load_weights('../models/efficientnetv2-m-21k.h5', by_name=True)
+    ```
+    Or define a new model from loaded model without head layers
     ```py
     model = tf.keras.models.load_model('efficientnetv2-s-21k.h5')
     # Output layer is `-3` without dropout layer
     model_notop = tf.keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output)
     model_notop.save('efficientnetv2-s-21k-notop.h5')
+    ```
+  - **Use dynamic input shape** by set `input_shape=(None, None, 3)`
+    ```py
+    import efficientnet_v2
+    model = efficientnet_v2.EfficientNetV2L(input_shape=(None, None, 3), survivals=None, dropout=1e-6, classes=0)
+    model.load_weights('../models/efficientnetv2-l-21k.h5', by_name=True)
+
+    model(np.ones([1, 224, 224, 3])).shape
+    # TensorShape([1, 7, 7, 1280])
+    model(np.ones([1, 384, 384, 3])).shape
+    # TensorShape([1, 12, 12, 1280])
     ```
   - EfficientNetV2-S architecture
 
