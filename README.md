@@ -15,16 +15,16 @@
 
     | Model           | Finetuned ImageNet1K Top1 Acc. | Params | ImageNet21K weight                                                                                            |
     | --------------- | ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
-    | EfficientNetV2S | 84.9%                          | 21.5M  | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |
-    | EfficientNetV2M | 86.2%                          | 54.1M  | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |
-    | EfficientNetV2L | 86.9%                          | 119.5M | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |
+    | EfficientNetV2S | 84.9%                          | 21.5M  | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |
+    | EfficientNetV2M | 86.2%                          | 54.1M  | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |
+    | EfficientNetV2L | 86.9%                          | 119.5M | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |
 
     | Model       | ImageNet1K Top1 Acc. | Params | ImageNet1K weight                                                                                                   |
     | ----------- | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
-    | EffNetV2-B0 | 78.7%                | 7.1M   | [efficientnetv2-b0-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-b0-imagenet.h5) |
-    | EffNetV2-B1 | 79.8%                | 8.1M   | [efficientnetv2-b1-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-b1-imagenet.h5) |
-    | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-b2-imagenet.h5) |
-    | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2_test/releases/download/v1.0.0/efficientnetv2-b3-imagenet.h5) |
+    | EffNetV2-B0 | 78.7%                | 7.1M   | [efficientnetv2-b0-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-imagenet.h5) |
+    | EffNetV2-B1 | 79.8%                | 8.1M   | [efficientnetv2-b1-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-imagenet.h5) |
+    | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-imagenet.h5) |
+    | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-imagenet.h5) |
 
   - **Usage**
     ```py
@@ -108,7 +108,7 @@
     ```sh
     .
     ├── automl  # Official repo
-    ├── Keras_efficientnet_v2_test  # This one
+    ├── Keras_efficientnet_v2  # This one
     ├── models  # Downloaded and extracted models
     ```
   - **Procedure**
@@ -138,7 +138,7 @@
     model.save_weights('aa.h5')
 
     """ Reload weights with the modified version """
-    sys.path.append("Keras_efficientnet_v2_test")
+    sys.path.append("Keras_efficientnet_v2")
     import convert_effnetv2_model
     mm = convert_effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
     len(mm(tf.ones([1, 224, 224, 3]), False))
