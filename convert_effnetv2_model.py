@@ -22,14 +22,16 @@
   EfficientNetV2: Smaller Models and Faster Training.
   https://arxiv.org/abs/2104.00298
 """
+import sys
+sys.path.append('../automl/efficientnetv2')
+
 import copy
 import itertools
 import math
+import os
 
 from absl import logging
 import numpy as np
-import six
-from six.moves import xrange
 import tensorflow as tf
 
 import effnetv2_configs
@@ -187,9 +189,11 @@ class MBConvBlock(tf.keras.layers.Layer):
     """Builds block according to the arguments."""
     # pylint: disable=g-long-lambda
     bid = itertools.count(0)
-    get_norm_name = lambda: self.name + 'tpu_batch_normalization' + ('0' if not next(bid) else '_' + str(next(bid) // 2))
+    get_norm_name = lambda: self.name + 'tpu_batch_normalization' + ('_0' if not next(
+        bid) else '_' + str(next(bid) // 2))
     cid = itertools.count(0)
-    get_conv_name = lambda: self.name + 'conv2d' + ('0' if not next(cid) else '_' + str(next(cid) // 2))
+    get_conv_name = lambda: self.name + 'conv2d' + ('0' if not next(cid) else '_' + str(
+        next(cid) // 2))
     # pylint: enable=g-long-lambda
 
     mconfig = self._mconfig
@@ -310,7 +314,7 @@ class FusedMBConvBlock(MBConvBlock):
     """Builds block according to the arguments."""
     # pylint: disable=g-long-lambda
     bid = itertools.count(0)
-    get_norm_name = lambda: self.name + 'tpu_batch_normalization' + ('0' if not next(
+    get_norm_name = lambda: self.name + 'tpu_batch_normalization' + ('_0' if not next(
         bid) else '_' + str(next(bid) // 2))
     cid = itertools.count(0)
     get_conv_name = lambda: self.name + 'conv2d' + ('0' if not next(cid) else '_' + str(
@@ -426,7 +430,7 @@ class Stem(tf.keras.layers.Layer):
 class Head(tf.keras.layers.Layer):
   """Head layer for network outputs."""
 
-  def __init__(self, mconfig, num_classes=1000, name=None):
+  def __init__(self, mconfig, name=None):
     super().__init__(name=name)
 
     self.endpoints = {}
@@ -451,13 +455,6 @@ class Head(tf.keras.layers.Layer):
 
     self._avg_pooling = tf.keras.layers.GlobalAveragePooling2D(
         data_format=mconfig.data_format)
-    if mconfig.num_classes:
-      self._fc = tf.keras.layers.Dense(
-          num_classes,
-          kernel_initializer=dense_kernel_initializer,
-          bias_initializer=tf.constant_initializer(mconfig.headbias or 0))
-    else:
-      self._fc = None
 
     if mconfig.dropout_rate > 0:
       self._dropout = tf.keras.layers.Dropout(mconfig.dropout_rate)
@@ -490,9 +487,6 @@ class Head(tf.keras.layers.Layer):
       self.endpoints['pooled_features'] = outputs
       if self._dropout:
         outputs = self._dropout(outputs, training=training)
-      self.endpoints['global_pool'] = outputs
-      if self._fc:
-        outputs = self._fc(outputs)
       self.endpoints['head'] = outputs
     return outputs
 
@@ -506,13 +500,15 @@ class EffNetV2Model(tf.keras.Model):
   def __init__(self,
                model_name='efficientnetv2-s',
                model_config=None,
+               include_top=True,
                num_classes=1000,
                name=None):
     """Initializes an `Model` instance.
 
     Args:
       model_name: A string of model name.
-      model_config: A dict of model configureations or a string of hparams.
+      model_config: A dict of model configurations or a string of hparams.
+      include_top: If True, include the top layer for classification.
       name: A string of layer name.
 
     Raises:
@@ -521,12 +517,12 @@ class EffNetV2Model(tf.keras.Model):
     super().__init__(name=name or model_name)
     cfg = copy.deepcopy(hparams.base_config)
     if model_name:
-      # 'efficientnetv2-s': (v2_s_block, 1.0, 1.0, 300, 384, 0.2, 10, 0, 'randaug'),
       cfg.override(effnetv2_configs.get_model_config(model_name))
     cfg.model.override(model_config)
     self.cfg = cfg
     self._mconfig = cfg.model
     self.endpoints = None
+    self.include_top = include_top
     self.num_classes = num_classes
     self._build()
 
@@ -562,25 +558,39 @@ class EffNetV2Model(tf.keras.Model):
         block_args.input_filters = block_args.output_filters
         block_args.strides = 1
         # pylint: enable=protected-access
-      for _ in xrange(block_args.num_repeat - 1):
+      for _ in range(block_args.num_repeat - 1):
         self._blocks.append(
             conv_block(block_args, self._mconfig, name=block_name()))
 
     # Head part.
-    self._head = Head(self._mconfig, num_classes=self.num_classes)
+    self._head = Head(self._mconfig)
+
+    # top part for classification
+    if self.include_top and self.num_classes:
+      self._fc = tf.keras.layers.Dense(
+          self.num_classes,
+          kernel_initializer=dense_kernel_initializer,
+          bias_initializer=tf.constant_initializer(self._mconfig.headbias or 0))
+    else:
+      self._fc = None
 
   def summary(self, input_shape=(224, 224, 3), **kargs):
     x = tf.keras.Input(shape=input_shape)
     model = tf.keras.Model(inputs=[x], outputs=self.call(x, training=True))
     return model.summary()
 
-  def call(self, inputs, training, features_only=None):
+  def get_model_with_inputs(self, inputs, **kargs):
+    model = tf.keras.Model(
+        inputs=[inputs], outputs=self.call(inputs, training=True))
+    return model
+
+  def call(self, inputs, training, with_endpoints=False):
     """Implementation of call().
 
     Args:
       inputs: input tensors.
       training: boolean, whether the model is constructed for training.
-      features_only: build the base feature network only.
+      with_endpoints: If true, return a list of endpoints.
 
     Returns:
       output tensors.
@@ -612,22 +622,265 @@ class EffNetV2Model(tf.keras.Model):
       if is_reduction:
         self.endpoints['reduction_%s' % reduction_idx] = outputs
       if block.endpoints:
-        for k, v in six.iteritems(block.endpoints):
+        for k, v in block.endpoints.items():
           self.endpoints['block_%s/%s' % (idx, k)] = v
           if is_reduction:
             self.endpoints['reduction_%s/%s' % (reduction_idx, k)] = v
     self.endpoints['features'] = outputs
 
-    if not features_only:
-      # Calls final layers and returns logits.
-      outputs = self._head.call(outputs, training)
-      self.endpoints.update(self._head.endpoints)
+    # Head to obtain the final feature.
+    outputs = self._head.call(outputs, training)
+    self.endpoints.update(self._head.endpoints)
 
-    return [outputs] + list(
-        filter(lambda endpoint: endpoint is not None, [
-            self.endpoints.get('reduction_1'),
-            self.endpoints.get('reduction_2'),
-            self.endpoints.get('reduction_3'),
-            self.endpoints.get('reduction_4'),
-            self.endpoints.get('reduction_5'),
-        ]))
+    # Calls final dense layers and returns logits.
+    if self._fc:
+      with tf.name_scope('head'):  # legacy
+        outputs = self._fc(outputs)
+
+    if with_endpoints:  # Use for building sequential models.
+      return [outputs] + list(
+          filter(lambda endpoint: endpoint is not None, [
+              self.endpoints.get('reduction_1'),
+              self.endpoints.get('reduction_2'),
+              self.endpoints.get('reduction_3'),
+              self.endpoints.get('reduction_4'),
+              self.endpoints.get('reduction_5'),
+          ]))
+
+    return outputs
+
+
+def get_model(model_name,
+              model_config=None,
+              include_top=True,
+              weights='imagenet',
+              training=True,
+              with_endpoints=False,
+              **kwargs):
+  """Get a EfficientNet V1 or V2 model instance.
+
+  This is a simply utility for finetuning or inference.
+
+  Args:
+    model_name: a string such as 'efficientnetv2-s' or 'efficientnet-b0'.
+    model_config: A dict of model configurations or a string of hparams.
+    include_top: whether to include the final dense layer for classification.
+    weights: One of None (random initialization),
+      'imagenet' (pretrained on ImageNet),
+      'imagenet21k' (pretrained on Imagenet21k),
+      'imagenet21k-ft1k' (pretrained on 21k and finetuned on 1k),
+      'jft' (trained with non-labelled JFT-300),
+      or the path to the weights file to be loaded. Defaults to 'imagenet'.
+    training: If true, all model variables are trainable.
+    with_endpoints: whether to return all intermedia endpoints.
+    **kwargs: additional parameters for keras model, such as name=xx.
+
+  Returns:
+    A single tensor if with_endpoints if False; otherwise, a list of tensor.
+  """
+  net = EffNetV2Model(model_name, model_config, include_top, **kwargs)
+  net(tf.keras.Input(shape=(None, None, 3)),
+      training=training,
+      with_endpoints=with_endpoints)
+
+  if not weights:  # pylint: disable=g-bool-id-comparison
+    return net
+
+  v2url = 'https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/v2/'
+  v1url = 'https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/advprop/'
+  v1jfturl = 'https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/noisystudent/'
+  pretrained_ckpts = {
+      # EfficientNet V2.
+      'efficientnetv2-s': {
+          'imagenet': v2url + 'efficientnetv2-s.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-s-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-s-21k-ft1k.tgz',
+      },
+      'efficientnetv2-m': {
+          'imagenet': v2url + 'efficientnetv2-m.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-m-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-m-21k-ft1k.tgz',
+      },
+      'efficientnetv2-l': {
+          'imagenet': v2url + 'efficientnetv2-l.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-l-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-l-21k-ft1k.tgz',
+      },
+      'efficientnetv2-xl': {
+          # no imagenet ckpt.
+          'imagenet21k': v2url + 'efficientnetv2-xl-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-xl-21k-ft1k.tgz',
+      },
+
+      'efficientnetv2-b0': {
+          'imagenet': v2url + 'efficientnetv2-b0.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-b0-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-b0-21k-ft1k.tgz',
+      },
+      'efficientnetv2-b1': {
+          'imagenet': v2url + 'efficientnetv2-b1.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-b1-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-b1-21k-ft1k.tgz',
+      },
+      'efficientnetv2-b2': {
+          'imagenet': v2url + 'efficientnetv2-b2.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-b2-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-b2-21k-ft1k.tgz',
+      },
+      'efficientnetv2-b3': {
+          'imagenet': v2url + 'efficientnetv2-b3.tgz',
+          'imagenet21k': v2url + 'efficientnetv2-b3-21k.tgz',
+          'imagenet21k-ft1k': v2url + 'efficientnetv2-b3-21k-ft1k.tgz',
+      },
+
+      # EfficientNet V1.
+      'efficientnet-b0': {
+          'imagenet': v1url + 'efficientnet-b0.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b0.tar.gz',
+      },
+      'efficientnet-b1': {
+          'imagenet': v1url + 'efficientnet-b1.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b1.tar.gz',
+      },
+      'efficientnet-b2': {
+          'imagenet': v1url + 'efficientnet-b2.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b2.tar.gz',
+      },
+      'efficientnet-b3': {
+          'imagenet': v1url + 'efficientnet-b3.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b3.tar.gz',
+      },
+      'efficientnet-b4': {
+          'imagenet': v1url + 'efficientnet-b4.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b4.tar.gz',
+      },
+      'efficientnet-b5': {
+          'imagenet': v1url + 'efficientnet-b5.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b5.tar.gz',
+      },
+      'efficientnet-b6': {
+          'imagenet': v1url + 'efficientnet-b6.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b6.tar.gz',
+      },
+      'efficientnet-b7': {
+          'imagenet': v1url + 'efficientnet-b7.tar.gz',
+          'jft': v1jfturl + 'noisy_student_efficientnet-b7.tar.gz',
+      },
+      'efficientnet-b8': {
+          'imagenet': v1url + 'efficientnet-b8.tar.gz',
+      },
+      'efficientnet-l2': {
+          'jft': v1jfturl + 'noisy_student_efficientnet-l2_475.tar.gz',
+      },
+  }
+
+  if model_name in pretrained_ckpts and weights in pretrained_ckpts[model_name]:
+    url = pretrained_ckpts[model_name][weights]
+    fname = os.path.basename(url).split('.')[0]
+    pretrained_ckpt= tf.keras.utils.get_file(fname, url , untar=True)
+  else:
+    pretrained_ckpt = weights
+
+  if tf.io.gfile.isdir(pretrained_ckpt):
+    pretrained_ckpt = tf.train.latest_checkpoint(pretrained_ckpt)
+  net.load_weights(pretrained_ckpt)
+  return net
+
+if __name__ == "__main__":
+    import os
+    import sys
+    import tensorflow as tf
+    import numpy as np
+    from tensorflow import keras
+    import argparse
+
+    default_save_dir = "../models/efficientnetv2"
+    all_model_types = ["b0", "b1", "b2", "b3", "s", "m", "l", "xl"]
+    all_datasets = ["imagenet", "imagenet21k", "imagenetft"]
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-m", "--model_type", type=str, default="s", help="all or value in {}".format(all_model_types))
+    parser.add_argument("-d", "--dataset", type=str, default="imagenet", help="all or value in {}".format(all_datasets))
+    parser.add_argument("-s", "--save_dir", type=str, default=default_save_dir, help="Model save dir")
+    parser.add_argument("-T", "--dont_save_no_top", action="store_true", help="Dont save no_top model")
+    args = parser.parse_known_args(sys.argv[1:])[0]
+
+    import datasets as orign_datasets
+    import effnetv2_model as orign_effnetv2_model
+
+    import efficientnet_v2 as keras_efficientnet_v2
+
+    """ Parameters """
+    model_type_list = [args.model_type] if args.model_type != "all" else all_model_types
+    dataset_list = [args.dataset] if args.dataset != "all" else all_datasets
+
+    for model_type in model_type_list:
+        for dataset in dataset_list:
+            print(">>>> model_type = {}, dataset = {}".format(model_type, dataset))
+            if model_type == "xl" and dataset == "imagenet":
+                print(">>>> Not included")
+                continue
+            
+            assert model_type in all_model_types
+            assert dataset in all_datasets
+
+            keras.backend.clear_session()
+
+            if dataset == "imagenet21k":
+                classes, dropout, survival_prob, load_weights, save_model_suffix = 21843, 1e-6, 1.0, "imagenet21k", "-21k"
+            elif dataset == "imagenetft":
+                classes, dropout, survival_prob, load_weights, save_model_suffix = 1000, 0.2, 0.8, "imagenet21k-ft1k", "-21k-ft1k"
+            else: # "imagenet"
+                classes, dropout, survival_prob, load_weights, save_model_suffix = 1000, 0.2, 0.8, "imagenet", "-imagenet"
+
+            print(">>>> classes = {}, dropout = {}, load_weights = {}, save_model_suffix = {}".format(classes, dropout, load_weights, save_model_suffix))
+
+            """ Define Keras model first just to keep the names start from `0` """
+            keras_model = keras_efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
+
+            """ Load checkpoints using official defination """
+            cc = orign_datasets.get_dataset_config(dataset)
+            if cc.get("model", None):
+                cc.model.num_classes = cc.data.num_classes
+            else:
+                cc['model'] = None
+            model = orign_effnetv2_model.get_model('efficientnetv2-{}'.format(model_type), model_config=cc.model, weights=load_weights)
+
+            """ Save h5 weights if no error happens """
+            model.save_weights('aa.h5')
+
+            """ Reload weights with this modified version """
+            mm = EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
+            len(mm(tf.ones([1, 224, 224, 3]), False))
+            mm.load_weights('aa.h5')
+
+            """ Define a new model using `mm.call`, as mm is a subclassed model, cannot be saved as h5 """
+            inputs = keras.Input([None, None, 3])
+            tt = keras.models.Model(inputs, mm.call(inputs, training=False))
+            tt.save('bb.h5')  # This is already a converted one.
+
+            """ Reload bb.h5 using full keras defined model """
+            keras_model.load_weights('bb.h5')
+
+            """ Output verification """
+            fake_input = tf.random.uniform([2, 224, 224, 3])
+            orign_out = model(fake_input)
+            converted_out = keras_model(fake_input)
+            test_result = np.allclose(orign_out.numpy(), converted_out.numpy())
+            print('>>>> Allclose:', test_result)
+            # Allclose: True
+
+            assert test_result
+
+            """ Save model and notop version """
+            if not os.path.exists(args.save_dir):
+                os.makedirs(args.save_dir)
+            save_path = os.path.join(args.save_dir, 'efficientnetv2-{}{}.h5'.format(model_type, save_model_suffix))
+            save_notop_path = os.path.join(args.save_dir, 'efficientnetv2-{}{}-notop.h5'.format(model_type, save_model_suffix))
+            print(">>>> save_path:", save_path)
+            keras_model.save(save_path)
+            if not args.dont_save_no_top:
+                print(">>>> save_notop_path:", save_notop_path)
+                keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save(save_notop_path)
+
+    os.remove("aa.h5")
+    os.remove("bb.h5")

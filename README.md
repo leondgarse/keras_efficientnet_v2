@@ -13,59 +13,51 @@
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
-    | Model           | Finetuned ImageNet1K Top1 Acc. | Params | ImageNet21K weight                                                                                            |
-    | --------------- | ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
-    | EfficientNetV2S | 84.9%                          | 21.5M  | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |
-    | EfficientNetV2M | 86.2%                          | 54.1M  | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |
-    | EfficientNetV2L | 86.9%                          | 119.5M | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |
+    | Model       | Params | ImageNet21K weight | ImageNet weight | Imagenet21k-ft1k weight |
+    | ----------- | ------ | ------------------ | --------------- | ----------------------- |
+    | EffNetV2-B0 | 7.1M   | [efficientnetv2-b0-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-imagenet.h5) |||
+    | EffNetV2-B1 | 8.1M   | [efficientnetv2-b1-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-imagenet.h5) |||
+    | EffNetV2-B2 | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-imagenet.h5) |||
+    | EffNetV2-B3 | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-imagenet.h5) |||
+    | EffNetV2S   | 21.5M  | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |||
+    | EffNetV2M   | 54.1M  | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |||
+    | EffNetV2L   | 119.5M | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |||
+    | EffNetV2XL  | 206.8M | [efficientnetv2-xl-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k.h5) |||
 
-    | Model       | ImageNet1K Top1 Acc. | Params | ImageNet1K weight                                                                                                   |
-    | ----------- | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
-    | EffNetV2-B0 | 78.7%                | 7.1M   | [efficientnetv2-b0-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-imagenet.h5) |
-    | EffNetV2-B1 | 79.8%                | 8.1M   | [efficientnetv2-b1-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-imagenet.h5) |
-    | EffNetV2-B2 | 80.5%                | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-imagenet.h5) |
-    | EffNetV2-B3 | 82.1%                | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-imagenet.h5) |
-
-  - **Usage**
+  - **Usage** default `input_shape` is set as dynamic `(None, None, 3)`
     ```py
     # Load directly
-    model = tf.keras.models.load_model('../models/efficientnetv2-s-21k.h5')
+    model = tf.keras.models.load_model('../models/efficientnetv2/efficientnetv2-b0-21k.h5')
     ```
     Or define model and load weights
     ```py
     # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]
     import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2(model_type="b0", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
-    model.load_weights('../models/efficientnetv2-b0-imagenet.h5')
+    model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
+    model.load_weights('../models/efficientnetv2/efficientnetv2-s-imagenet.h5')
     ```
     `EfficientNetV2S` / `EfficientNetV2M` / `EfficientNetV2L` are also added just with the relative `model_type`
     ```py
-    model = efficientnet_v2.EfficientNetV2S(survivals=None, dropout=1e-6, classes=21843, classifier_activation=None)
-    ```
-  - **Exclude model top layers**
-    ```py
-    # Load weights with `by_name=True`
-    import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2M(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0)
-    model.load_weights('../models/efficientnetv2-m-21k.h5', by_name=True)
-    ```
-    Or define a new model from loaded model without head layers
-    ```py
-    model = tf.keras.models.load_model('efficientnetv2-s-21k.h5')
-    # Output layer is `-3` without dropout layer
-    model_notop = tf.keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output)
-    model_notop.save('efficientnetv2-s-21k-notop.h5')
-    ```
-  - **Use dynamic input shape** by set `input_shape=(None, None, 3)`
-    ```py
-    import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2L(input_shape=(None, None, 3), survivals=None, dropout=1e-6, classes=0)
-    model.load_weights('../models/efficientnetv2-l-21k.h5', by_name=True)
+    model = efficientnet_v2.EfficientNetV2M(survivals=0.8, dropout=1e-6, classes=0, classifier_activation=None)
 
     model(np.ones([1, 224, 224, 3])).shape
     # TensorShape([1, 7, 7, 1280])
     model(np.ones([1, 384, 384, 3])).shape
     # TensorShape([1, 12, 12, 1280])
+    ```
+  - **Exclude model top layers**
+    ```py
+    # Load weights with `by_name=True`
+    import efficientnet_v2
+    model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0)
+    model.load_weights('../models/efficientnetv2/efficientnetv2-l-21k.h5', by_name=True)
+    ```
+    Or define a new model from loaded model without head layers
+    ```py
+    model = tf.keras.models.load_model('../models/efficientnetv2/efficientnetv2-b3-21k-ft1k.h5')
+    # Output layer is `-3` without dropout layer
+    model_notop = tf.keras.models.Model(model.inputs[0], model.layers[-4].output)
+    model_notop.save('efficientnetv2-b3-21k-ft1k-notop.h5')
     ```
   - EfficientNetV2-S architecture
 
@@ -104,65 +96,37 @@
     - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
     - Just use `Add` layer instead of `utils.drop_connect`, as when `is_training=False`, `utils.drop_connect` functions like `Add`.
     - Add a `num_classes` parameter outside of `mconfig`.
-  - Clone repos and download pre-trained models
+    - Add `__main__` part, which makes this runable as script.
+    - Refer to `__main__` part for converting detail.
+  - Depends on official repo
     ```sh
-    .
+    ../
     ├── automl  # Official repo
     ├── Keras_efficientnet_v2  # This one
-    ├── models  # Downloaded and extracted models
     ```
   - **Procedure**
     ```py
-    import sys
-    import tensorflow as tf
-    import numpy as np
-    from tensorflow import keras
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -h
+    # usage: convert_effnetv2_model.py [-h] [-m MODEL_TYPE] [-d DATASET] [-s SAVE_DIR] [-T]
+    # optional arguments:
+    #   -h, --help            show this help message and exit
+    #   -m MODEL_TYPE, --model_type MODEL_TYPE
+    #                         all or value in ['b0', 'b1', 'b2', 'b3', 's', 'm', 'l', 'xl'] (default: s)
+    #   -d DATASET, --dataset DATASET
+    #                         all or value in ['imagenet', 'imagenet21k', 'imagenetft'] (default: imagenet)
+    #   -s SAVE_DIR, --save_dir SAVE_DIR
+    #                         Model save dir (default: ../models/efficientnetv2)
+    #   -T, --dont_save_no_top
+    #                         Dont save no_top model (default: False)
 
-    """ Parameters """
-    model_type, dataset = 's', "imagenet21k"
-    if dataset == "imagenet21k":
-        classes, dropout, load_model_suffix, save_model_suffix = 21843, 1e-6, "-21k", "-21k"
-    else:
-        classes, dropout, load_model_suffix, save_model_suffix = 1000, 0.2, "", "-imagenet"
+    # Convert by specific model_type and dataset type
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m xl -d imagenet21k
 
-    """ Load checkpoints using official defination """
-    sys.path.append('automl/efficientnetv2')
-    import infer, effnetv2_model
-    config = infer.get_config('efficientnetv2-{}'.format(model_type), dataset)
-    model = effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), config.model)
-    len(model(tf.ones([1, 224, 224, 3]), False))
-    ckpt = tf.train.latest_checkpoint('models/efficientnetv2-{}{}'.format(model_type, load_model_suffix))
-    model.load_weights(ckpt)
+    # Convert by specific model_type and and all dataset ['imagenet', 'imagenet21k', 'imagenetft']
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m s -d all
 
-    """ Save h5 weights if no error happens """
-    model.save_weights('aa.h5')
-
-    """ Reload weights with the modified version """
-    sys.path.append("Keras_efficientnet_v2")
-    import convert_effnetv2_model
-    mm = convert_effnetv2_model.EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
-    len(mm(tf.ones([1, 224, 224, 3]), False))
-    mm.load_weights('aa.h5')
-
-    """ Define a new model using `mm.call`, as mm is a subclassed model, cannot be saved as h5 """
-    inputs = keras.Input([224, 224, 3])
-    tt = keras.models.Model(inputs, mm.call(inputs, training=False))
-    tt.save('bb.h5')  # This is already a converted one.
-
-    """ Reload bb.h5 using full keras defined model """
-    import efficientnet_v2
-    keras_model = efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
-    keras_model.load_weights('bb.h5')
-
-    """ Output verification """
-    orign_out = model(tf.ones([1, 224, 224, 3]))[0]
-    converted_out = keras_model(tf.ones([1, 224, 224, 3]))
-    print('Allclose:', np.allclose(orign_out.numpy(), converted_out.numpy()))
-    # Allclose: True
-
-    """ Save model and notop version """
-    keras_model.save('models/efficientnetv2-{}{}.h5'.format(model_type, save_model_suffix))
-    keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save('models/efficientnetv2-{}{}-notop.h5'.format(model_type, save_model_suffix))
+    # Convert all model_type and and all dataset
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m all -d all
     ```
 # Progressive train test on cifar10
   - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1vmAEfF9tUgK2gkrS5qVftadTyUcX343D?usp=sharing)
