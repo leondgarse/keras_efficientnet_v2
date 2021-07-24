@@ -91,13 +91,12 @@
     - Dropout (Srivastava et al., 2014)
     - and stochastic depth (Huang et al., 2016) with 0.8 survival probability
 # Detailed conversion procedure
-  - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py)
+  - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py). Check detail by `vimdiff convert_effnetv2_model.py ../automl/efficientnetv2/effnetv2_model.py`
     - Delete some `names`, as they may cause confliction in keras.
     - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
     - Just use `Add` layer instead of `utils.drop_connect`, as when `is_training=False`, `utils.drop_connect` functions like `Add`.
     - Add a `num_classes` parameter outside of `mconfig`.
-    - Add `__main__` part, which makes this runable as script.
-    - Refer to `__main__` part for converting detail.
+    - Add `__main__` part, which makes this can be run as a script. Refer to it for converting detail.
   - Depends on official repo
     ```sh
     ../
