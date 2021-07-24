@@ -819,7 +819,7 @@ if __name__ == "__main__":
             if model_type == "xl" and dataset == "imagenet":
                 print(">>>> Not included")
                 continue
-            
+
             assert model_type in all_model_types
             assert dataset in all_datasets
 
@@ -846,7 +846,7 @@ if __name__ == "__main__":
             model = orign_effnetv2_model.get_model('efficientnetv2-{}'.format(model_type), model_config=cc.model, weights=load_weights)
 
             """ Save h5 weights if no error happens """
-            model.save_weights('aa.h5')
+            model.save_weights('convert_temp_aa.h5')
 
             """ Reload weights with this modified version """
             mm = EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
@@ -859,7 +859,7 @@ if __name__ == "__main__":
             tt.save('bb.h5')  # This is already a converted one.
 
             """ Reload bb.h5 using full keras defined model """
-            keras_model.load_weights('bb.h5')
+            keras_model.load_weights('convert_temp_bb.h5')
 
             """ Output verification """
             fake_input = tf.random.uniform([2, 224, 224, 3])
@@ -882,5 +882,5 @@ if __name__ == "__main__":
                 print(">>>> save_notop_path:", save_notop_path)
                 keras.models.Model(keras_model.inputs[0], keras_model.layers[-4].output).save(save_notop_path)
 
-    os.remove("aa.h5")
-    os.remove("bb.h5")
+    os.remove("convert_temp_aa.h5")
+    os.remove("convert_temp_bb.h5")
