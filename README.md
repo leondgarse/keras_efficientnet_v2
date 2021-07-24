@@ -13,16 +13,16 @@
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
-    | Model       | Params | ImageNet21K weight | ImageNet weight | Imagenet21k-ft1k weight |
-    | ----------- | ------ | ------------------ | --------------- | ----------------------- |
-    | EffNetV2-B0 | 7.1M   | [efficientnetv2-b0-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-imagenet.h5) |||
-    | EffNetV2-B1 | 8.1M   | [efficientnetv2-b1-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-imagenet.h5) |||
-    | EffNetV2-B2 | 10.1M  | [efficientnetv2-b2-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-imagenet.h5) |||
-    | EffNetV2-B3 | 14.4M  | [efficientnetv2-b3-imagenet.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-imagenet.h5) |||
-    | EffNetV2S   | 21.5M  | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |||
-    | EffNetV2M   | 54.1M  | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |||
-    | EffNetV2L   | 119.5M | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |||
-    | EffNetV2XL  | 206.8M | [efficientnetv2-xl-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k.h5) |||
+    | Model       | Params | ImageNet21K weight | Imagenet21k-ft1k weight |
+    | ----------- | ------ | ------------------ | ----------------------- |
+    | EffNetV2-B0 | 7.1M   |[efficientnetv2-b0-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-21k.h5) |[efficientnetv2-b0-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-21k-ft1k.h5)|
+    | EffNetV2-B1 | 8.1M   |[efficientnetv2-b1-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-21k.h5) |[efficientnetv2-b1-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-21k-ft1k.h5)|
+    | EffNetV2-B2 | 10.1M  |[efficientnetv2-b2-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-21k.h5) |[efficientnetv2-b2-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-21k-ft1k.h5)|
+    | EffNetV2-B3 | 14.4M  |[efficientnetv2-b3-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-21k.h5) |[efficientnetv2-b3-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-21k-ft1k.h5)|
+    | EffNetV2S   | 21.5M  |[efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |[efficientnetv2-s-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k-ft1k.h5)|
+    | EffNetV2M   | 54.1M  |[efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |[efficientnetv2-m-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k-ft1k.h5)|
+    | EffNetV2L   | 119.5M |[efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |[efficientnetv2-l-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k-ft1k.h5)|
+    | EffNetV2XL  | 206.8M |[efficientnetv2-xl-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k.h5) |[efficientnetv2-l-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k-ft1k.h5)|
 
   - **Usage** default `input_shape` is set as dynamic `(None, None, 3)`
     ```py
@@ -36,7 +36,7 @@
     model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
     model.load_weights('../models/efficientnetv2/efficientnetv2-s-imagenet.h5')
     ```
-    `EfficientNetV2S` / `EfficientNetV2M` / `EfficientNetV2L` are also added just with the relative `model_type`
+    `EfficientNetV2S` / `EfficientNetV2M` / `EfficientNetV2L` / `EfficientNetV2XL` are also added just with the relative `model_type`
     ```py
     model = efficientnet_v2.EfficientNetV2M(survivals=0.8, dropout=1e-6, classes=0, classifier_activation=None)
 
@@ -122,10 +122,10 @@
     # Convert by specific model_type and dataset type
     CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m xl -d imagenet21k
 
-    # Convert by specific model_type and and all dataset ['imagenet', 'imagenet21k', 'imagenetft']
+    # Convert by specific model_type and all its datasets ['imagenet', 'imagenet21k', 'imagenetft']
     CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m s -d all
 
-    # Convert all model_type and and all dataset
+    # Convert all model_types and and all datasets
     CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m all -d all
     ```
 # Progressive train test on cifar10
