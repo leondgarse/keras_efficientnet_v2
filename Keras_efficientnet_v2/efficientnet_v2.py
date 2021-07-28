@@ -210,6 +210,7 @@ def EfficientNetV2(
 ):
     """
     model_type: is the pre-defined model, value in ["s", "m", "l", "b0", "b1", "b2", "b3"].
+    classes: Output classes number, 0 to exclude top layers.
     first_strides: is used in the first Conv2D layer.
     survivals: is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
         Can be a constant value like `0.5` or `0.8`,

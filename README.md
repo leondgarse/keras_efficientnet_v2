@@ -52,9 +52,9 @@
     ```py
     pip install -U git+https://github.com/leondgarse/Keras_efficientnet_v2
     ```
-  - **Exclude model top layers**
+  - **Exclude model top layers** set `calsses=0` to exclude top layers.
     ```py
-    # Load weights with `by_name=True`
+    # Load weights with `by_name=True`. This is the default behavior for `pretrained` not `None`
     from Keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0, pretrained=None)
     model.load_weights('../models/efficientnetv2/efficientnetv2-l-21k.h5', by_name=True)
