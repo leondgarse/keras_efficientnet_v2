@@ -851,14 +851,14 @@ if __name__ == "__main__":
             """ Reload weights with this modified version """
             mm = EffNetV2Model('efficientnetv2-{}'.format(model_type), num_classes=classes)
             len(mm(tf.ones([1, 224, 224, 3]), False))
-            mm.load_weights('aa.h5')
+            mm.load_weights('convert_temp_aa.h5')
 
             """ Define a new model using `mm.call`, as mm is a subclassed model, cannot be saved as h5 """
             inputs = keras.Input([None, None, 3])
             tt = keras.models.Model(inputs, mm.call(inputs, training=False))
-            tt.save('bb.h5')  # This is already a converted one.
+            tt.save('convert_temp_bb.h5')  # This is already a converted one.
 
-            """ Reload bb.h5 using full keras defined model """
+            """ Reload convert_temp_bb.h5 using full keras defined model """
             keras_model.load_weights('convert_temp_bb.h5')
 
             """ Output verification """
