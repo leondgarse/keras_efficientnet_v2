@@ -32,7 +32,7 @@
     Or define model and load weights
     ```py
     # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]
-    import efficientnet_v2
+    from Keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
     model.load_weights('../models/efficientnetv2/efficientnetv2-s-imagenet.h5')
     ```
@@ -48,7 +48,7 @@
   - **Exclude model top layers**
     ```py
     # Load weights with `by_name=True`
-    import efficientnet_v2
+    from Keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0)
     model.load_weights('../models/efficientnetv2/efficientnetv2-l-21k.h5', by_name=True)
     ```
@@ -139,7 +139,7 @@
   ```py
   from tensorflow import keras
   import progressive_train_test
-  import efficientnet_v2
+  from Keras_efficientnet_v2 import efficientnet_v2
 
   num_classes = 10
   ev2_s = efficientnet_v2.EfficientNetV2("s", input_shape=(None, None, 3), classes=0)
