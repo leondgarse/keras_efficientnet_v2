@@ -205,7 +205,7 @@ def EfficientNetV2(
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
-    pretrained="imagenet21k",
+    pretrained="imagenet21k-ft1k",
     name="EfficientNetV2",
 ):
     """

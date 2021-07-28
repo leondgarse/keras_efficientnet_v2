@@ -29,9 +29,9 @@
     # Load directly
     model = tf.keras.models.load_model('../models/efficientnetv2/efficientnetv2-b0-21k.h5')
     ```
-    Or define model and load weights. Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k`.
+    Or define model and load weights. Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k-ft1k`.
     ```py
-    # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]. Will download and load `imagenet21k` pretrained weights.
+    # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]. Will download and load `imagenet21k-ft1k` pretrained weights.
     from Keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=21843, classifier_activation=None)
 
