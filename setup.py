@@ -2,7 +2,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name="Keras-efficientnet-v2",
+    name="keras-efficientnet-v2",
     version="1.0.0",
     author="Leondgarse",
     author_email="leondgarse@google.com",

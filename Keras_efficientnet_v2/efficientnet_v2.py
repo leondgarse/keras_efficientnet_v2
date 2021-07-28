@@ -4,6 +4,7 @@ Mingxing Tan, Quoc V. Le. (2021).
 EfficientNetV2: Smaller Models and Faster Training
 arXiv preprint arXiv:2104.00298.
 """
+import os
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as K
@@ -204,6 +205,7 @@ def EfficientNetV2(
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
+    pretrained="imagenet21k",
     name="EfficientNetV2",
 ):
     """
@@ -214,6 +216,7 @@ def EfficientNetV2(
         or a tuple value like `(1, 0.8)` indicates the survival probability linearly changes from `1 --> 0.8` for `top --> bottom` layers.
         A higher value means a higher probability will keep the conv branch.
         or `None` to disable.
+    pretrained: value in [None, "imagenet", "imagenet21k", "imagenet21k-ft1k"].
     """
     blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
@@ -260,7 +263,16 @@ def EfficientNetV2(
         if dropout > 0 and dropout < 1:
             nn = Dropout(dropout)(nn)
         nn = Dense(classes, activation=classifier_activation, name="predictions")(nn)
-    return Model(inputs=inputs, outputs=nn, name=name)
+    model = Model(inputs=inputs, outputs=nn, name=name)
+
+    pretrained_dd = {"imagenet": "imagenet", "imagenet21k": "21k", "imagenet21k-ft1k": "21k-ft1k"}
+    if pretrained in pretrained_dd:
+        pre_url = "https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-{}-{}.h5"
+        url = pre_url.format(model_type, pretrained_dd[pretrained])
+        file_name = os.path.basename(url)
+        pretrained_model = keras.utils.get_file(file_name, url)
+        model.load_weights(pretrained_model, by_name=True, skip_mismatch=True)
+    return model
 
 
 def EfficientNetV2S(
@@ -270,6 +282,7 @@ def EfficientNetV2S(
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
+    pretrained="imagenet21k",
     name="EfficientNetV2S",
 ):
     return EfficientNetV2(model_type="s", **locals())
@@ -282,6 +295,7 @@ def EfficientNetV2M(
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
+    pretrained="imagenet21k",
     name="EfficientNetV2M",
 ):
     return EfficientNetV2(model_type="m", **locals())
@@ -294,6 +308,7 @@ def EfficientNetV2L(
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
+    pretrained="imagenet21k",
     name="EfficientNetV2L",
 ):
     return EfficientNetV2(model_type="l", **locals())
@@ -306,6 +321,7 @@ def EfficientNetV2XL(
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
+    pretrained="imagenet21k",
     name="EfficientNetV2XL",
 ):
     return EfficientNetV2(model_type="xl", **locals())
