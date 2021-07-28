@@ -29,27 +29,34 @@
     # Load directly
     model = tf.keras.models.load_model('../models/efficientnetv2/efficientnetv2-b0-21k.h5')
     ```
-    Or define model and load weights
+    Or define model and load weights. Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k`.
     ```py
-    # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]
+    # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]. Will download and load `imagenet21k` pretrained weights.
     from Keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
+
+    # Or load weights manually
+    model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None, pretrained=None)
     model.load_weights('../models/efficientnetv2/efficientnetv2-s-imagenet.h5')
     ```
     `EfficientNetV2S` / `EfficientNetV2M` / `EfficientNetV2L` / `EfficientNetV2XL` are also added just with the relative `model_type`
     ```py
-    model = efficientnet_v2.EfficientNetV2M(survivals=0.8, dropout=1e-6, classes=0, classifier_activation=None)
+    model = efficientnet_v2.EfficientNetV2M(survivals=0.8, dropout=1e-6, classes=0, classifier_activation=None, pretrained=None)
 
     model(np.ones([1, 224, 224, 3])).shape
     # TensorShape([1, 7, 7, 1280])
     model(np.ones([1, 384, 384, 3])).shape
     # TensorShape([1, 12, 12, 1280])
     ```
+    Pip package can be installed as
+    ```py
+    pip install -U git+https://github.com/leondgarse/Keras_efficientnet_v2
+    ```
   - **Exclude model top layers**
     ```py
     # Load weights with `by_name=True`
     from Keras_efficientnet_v2 import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0)
+    model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0, pretrained=None)
     model.load_weights('../models/efficientnetv2/efficientnetv2-l-21k.h5', by_name=True)
     ```
     Or define a new model from loaded model without head layers
