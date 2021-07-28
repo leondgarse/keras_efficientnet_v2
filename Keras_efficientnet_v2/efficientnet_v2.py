@@ -217,7 +217,7 @@ def EfficientNetV2(
         or a tuple value like `(1, 0.8)` indicates the survival probability linearly changes from `1 --> 0.8` for `top --> bottom` layers.
         A higher value means a higher probability will keep the conv branch.
         or `None` to disable.
-    pretrained: value in [None, "imagenet", "imagenet21k", "imagenet21k-ft1k"].
+    pretrained: value in [None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]. Save path is `~/.keras/models/efficientnetv2/`.
     """
     blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
