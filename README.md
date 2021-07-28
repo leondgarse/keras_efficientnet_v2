@@ -33,7 +33,7 @@
     ```py
     # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]. Will download and load `imagenet21k` pretrained weights.
     from Keras_efficientnet_v2 import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None)
+    model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=21843, classifier_activation=None)
 
     # Or load weights manually
     model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None, pretrained=None)

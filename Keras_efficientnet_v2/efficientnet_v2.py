@@ -271,7 +271,7 @@ def EfficientNetV2(
         pre_url = "https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-{}-{}.h5"
         url = pre_url.format(model_type, pretrained_dd[pretrained])
         file_name = os.path.basename(url)
-        pretrained_model = keras.utils.get_file(file_name, url)
+        pretrained_model = keras.utils.get_file(file_name, url, cache_subdir="models")
         model.load_weights(pretrained_model, by_name=True, skip_mismatch=True)
     return model
 
