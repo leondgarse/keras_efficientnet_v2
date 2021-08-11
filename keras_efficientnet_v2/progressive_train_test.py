@@ -11,15 +11,12 @@ class RandomProcessImage:
         self.target_shape, self.magnitude, self.keep_shape = target_shape, magnitude, keep_shape
         self.target_shape = target_shape if len(target_shape) == 2 else target_shape[:2]
         if magnitude > 0:
-            import augment
+            from keras_efficientnet_v2 import augment
 
             translate_const, cutout_const = 100, 40
             # translate_const = int(target_shape[0] * 10 / magnitude)
             # cutout_const = int(target_shape[0] * 40 / 224)
-            print(
-                ">>>> RandAugment: magnitude = %d, translate_const = %d, cutout_const = %d"
-                % (magnitude, translate_const, cutout_const)
-            )
+            print(">>>> RandAugment: magnitude = %d, translate_const = %d, cutout_const = %d" % (magnitude, translate_const, cutout_const))
             aa = augment.RandAugment(magnitude=magnitude, translate_const=translate_const, cutout_const=cutout_const)
             # aa.available_ops = ["AutoContrast", "Equalize", "Invert", "Rotate", "Posterize", "Solarize", "Color", "Contrast", "Brightness", "Sharpness", "ShearX", "ShearY", "TranslateX", "TranslateY", "Cutout", "SolarizeAdd"]
             self.process = lambda img: aa.distort(img)
@@ -99,11 +96,7 @@ def progressive_with_dropout_randaug(
     histories = []
     stages = min([len(target_shapes), len(dropouts), len(magnitudes)])
     for stage, target_shape, dropout, magnitude in zip(range(stages), target_shapes, dropouts, magnitudes):
-        print(
-            ">>>> stage: {}/{}, target_shape: {}, dropout: {}, magnitude: {}".format(
-                stage + 1, stages, target_shape, dropout, magnitude
-            )
-        )
+        print(">>>> stage: {}/{}, target_shape: {}, dropout: {}, magnitude: {}".format(stage + 1, stages, target_shape, dropout, magnitude))
         if len(dropouts) > 1 and isinstance(model.layers[dropout_layer], keras.layers.Dropout):
             print(">>>> Changing dropout rate to:", dropout)
             model.layers[dropout_layer].rate = dropout
@@ -166,8 +159,8 @@ if __name__ == "__test_cifar10__":
     import json
     import tensorflow_addons as tfa
     from icecream import ic
-    import efficientnet_v2
-    import progressive_train_test
+    import keras_efficientnet_v2
+    from keras_efficientnet_v2 import progressive_train_test
 
     keras.mixed_precision.set_global_policy("mixed_float16")
 
@@ -177,8 +170,7 @@ if __name__ == "__test_cifar10__":
         data_name="cifar10", target_shape=input_shape, batch_size=batch_size, magnitude=15
     )
 
-    eb2s = eb2s = efficientnet_v2.EfficientNetV2("s", input_shape=(224, 224, 3), classes=0)
-    eb2s.load_weights("../models/efficientnetv2-s-21k.h5", by_name=True)
+    eb2s = keras_efficientnet_v2.EfficientNetV2S(input_shape=(224, 224, 3), num_classes=0)
     out = eb2s.output
 
     nn = keras.layers.GlobalAveragePooling2D(name="avg_pool")(out)

@@ -794,7 +794,7 @@ if __name__ == "__main__":
     from tensorflow import keras
     import argparse
 
-    default_save_dir = "../models/efficientnetv2"
+    default_save_dir = "./"
     all_model_types = ["b0", "b1", "b2", "b3", "s", "m", "l", "xl"]
     all_datasets = ["imagenet", "imagenet21k", "imagenetft"]
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -807,7 +807,7 @@ if __name__ == "__main__":
     import datasets as orign_datasets
     import effnetv2_model as orign_effnetv2_model
 
-    from keras_efficientnet_v2 import efficientnet_v2 as keras_efficientnet_v2
+    import keras_efficientnet_v2
 
     """ Parameters """
     model_type_list = [args.model_type] if args.model_type != "all" else all_model_types
@@ -835,7 +835,7 @@ if __name__ == "__main__":
             print(">>>> classes = {}, dropout = {}, load_weights = {}, save_model_suffix = {}".format(classes, dropout, load_weights, save_model_suffix))
 
             """ Define Keras model first just to keep the names start from `0` """
-            keras_model = keras_efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, classes=classes, classifier_activation=None)
+            keras_model = keras_efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, num_classes=classes, classifier_activation=None, pretrained=None)
 
             """ Load checkpoints using official defination """
             cc = orign_datasets.get_dataset_config(dataset)

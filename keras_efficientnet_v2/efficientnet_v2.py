@@ -120,9 +120,10 @@ def _make_divisible(v, divisor=4, min_value=None):
 
 
 def conv2d_no_bias(inputs, filters, kernel_size, strides=1, padding="VALID", name=""):
-    return Conv2D(
-        filters, kernel_size, strides=strides, padding=padding, use_bias=False, kernel_initializer=CONV_KERNEL_INITIALIZER, name=name + "conv"
-    )(inputs)
+    return Conv2D(filters, kernel_size, strides=strides, padding=padding, use_bias=False, kernel_initializer=CONV_KERNEL_INITIALIZER, name=name + "conv")(
+        inputs
+    )
+
 
 def batchnorm_with_activation(inputs, activation="swish", name=""):
     """Performs a batch normalization followed by an activation. """
@@ -137,6 +138,7 @@ def batchnorm_with_activation(inputs, activation="swish", name=""):
         nn = Activation(activation=activation, name=name + activation)(nn)
         # nn = PReLU(shared_axes=[1, 2], alpha_initializer=tf.initializers.Constant(0.25), name=name + "PReLU")(nn)
     return nn
+
 
 def se_module(inputs, se_ratio=4, name=""):
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
@@ -170,9 +172,7 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None
         nn = inputs
 
     if not is_fused:
-        nn = DepthwiseConv2D(
-            (3, 3), padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw_"
-        )(nn)
+        nn = DepthwiseConv2D((3, 3), padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw_")(nn)
         nn = batchnorm_with_activation(nn, name=name + "MB_dw_")
 
     if use_se:
@@ -200,25 +200,15 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None
 def EfficientNetV2(
     model_type,
     input_shape=(None, None, 3),
-    classes=1000,
+    num_classes=1000,
     dropout=0.2,
     first_strides=2,
     survivals=None,
     classifier_activation="softmax",
     pretrained="imagenet21k-ft1k",
-    name="EfficientNetV2",
+    model_name="EfficientNetV2",
+    kwargs=None,    # Not used, just recieving parameter
 ):
-    """
-    model_type: is the pre-defined model, value in ["s", "m", "l", "b0", "b1", "b2", "b3"].
-    classes: Output classes number, 0 to exclude top layers.
-    first_strides: is used in the first Conv2D layer.
-    survivals: is used for [Deep Networks with Stochastic Depth](https://arxiv.org/abs/1603.09382).
-        Can be a constant value like `0.5` or `0.8`,
-        or a tuple value like `(1, 0.8)` indicates the survival probability linearly changes from `1 --> 0.8` for `top --> bottom` layers.
-        A higher value means a higher probability will keep the conv branch.
-        or `None` to disable.
-    pretrained: value in [None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]. Save path is `~/.keras/models/efficientnetv2/`.
-    """
     blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
     out_channels = blocks_config["out_channels"]
@@ -259,74 +249,69 @@ def EfficientNetV2(
     nn = conv2d_no_bias(nn, output_conv_filter, (1, 1), strides=(1, 1), padding="valid", name="post_")
     nn = batchnorm_with_activation(nn, name="post_")
 
-    if classes > 0:
+    if num_classes > 0:
         nn = GlobalAveragePooling2D(name="avg_pool")(nn)
         if dropout > 0 and dropout < 1:
             nn = Dropout(dropout)(nn)
-        nn = Dense(classes, activation=classifier_activation, name="predictions")(nn)
-    model = Model(inputs=inputs, outputs=nn, name=name)
+        nn = Dense(num_classes, activation=classifier_activation, name="predictions")(nn)
 
-    pretrained_dd = {"imagenet": "imagenet", "imagenet21k": "21k", "imagenet21k-ft1k": "21k-ft1k"}
-    if pretrained in pretrained_dd:
-        pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-{}-{}.h5"
-        url = pre_url.format(model_type, pretrained_dd[pretrained])
-        file_name = os.path.basename(url)
-        pretrained_model = keras.utils.get_file(file_name, url, cache_subdir="models/efficientnetv2")
-        model.load_weights(pretrained_model, by_name=True, skip_mismatch=True)
+    model = Model(inputs=inputs, outputs=nn, name=name)
+    reload_model_weights(model, model_type, pretrained)
     return model
 
 
-def EfficientNetV2S(
-    input_shape=(None, None, 3),
-    classes=1000,
-    dropout=0.2,
-    first_strides=2,
-    survivals=None,
-    classifier_activation="softmax",
-    pretrained="imagenet21k",
-    name="EfficientNetV2S",
-):
-    return EfficientNetV2(model_type="s", **locals())
+def reload_model_weights(model, model_type, pretrained="imagenet"):
+    pretrained_dd = {"imagenet": "imagenet", "imagenet21k": "21k", "imagenet21k-ft1k": "21k-ft1k"}
+    if not pretrained in pretrained_dd:
+        print(">>>> No pretraind available, model will be random initialized")
+        return
+
+    pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-{}-{}.h5"
+    url = pre_url.format(model_type, pretrained_dd[pretrained])
+    file_name = os.path.basename(url)
+    try:
+        pretrained_model = keras.utils.get_file(file_name, url, cache_subdir="models/efficientnetv2")
+    except:
+        print("[Error] will not load weights, url not found or download failed:", url)
+        return
+    else:
+        print(">>>> Load pretraind from:", pretrained_model)
+        model.load_weights(pretrained_model, by_name=True, skip_mismatch=True)
 
 
-def EfficientNetV2M(
-    input_shape=(None, None, 3),
-    classes=1000,
-    dropout=0.3,
-    first_strides=2,
-    survivals=None,
-    classifier_activation="softmax",
-    pretrained="imagenet21k",
-    name="EfficientNetV2M",
-):
-    return EfficientNetV2(model_type="m", **locals())
+def EfficientNetV2B0(input_shape=(224, 224, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="b0", model_name="EfficientNetV2B0", **locals(), **kwargs)
 
 
-def EfficientNetV2L(
-    input_shape=(None, None, 3),
-    classes=1000,
-    dropout=0.4,
-    first_strides=2,
-    survivals=None,
-    classifier_activation="softmax",
-    pretrained="imagenet21k",
-    name="EfficientNetV2L",
-):
-    return EfficientNetV2(model_type="l", **locals())
+def EfficientNetV2B1(input_shape=(240, 240, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="b1", model_name="EfficientNetV2B1", **locals(), **kwargs)
 
 
-def EfficientNetV2XL(
-    input_shape=(None, None, 3),
-    classes=1000,
-    dropout=0.4,
-    first_strides=2,
-    survivals=None,
-    classifier_activation="softmax",
-    pretrained="imagenet21k",
-    name="EfficientNetV2XL",
-):
-    return EfficientNetV2(model_type="xl", **locals())
+def EfficientNetV2B2(input_shape=(260, 260, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="b2", model_name="EfficientNetV2B2", **locals(), **kwargs)
+
+
+def EfficientNetV2B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="b3", model_name="EfficientNetV2B3", **locals(), **kwargs)
+
+
+def EfficientNetV2S(input_shape=(384, 384, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="s", model_name="EfficientNetV2S", **locals(), **kwargs)
+
+
+def EfficientNetV2M(input_shape=(480, 480, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="m", model_name="EfficientNetV2M", **locals(), **kwargs)
+
+
+def EfficientNetV2L(input_shape=(480, 480, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="l", model_name="EfficientNetV2L", **locals(), **kwargs)
+
+
+def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="xl", model_name="EfficientNetV2XL", **locals(), **kwargs)
+
 
 def get_actual_survival_probabilities(model):
     from tensorflow_addons.layers import StochasticDepth
+
     return [ii.survival_probability for ii in model.layers if isinstance(ii, StochasticDepth)]

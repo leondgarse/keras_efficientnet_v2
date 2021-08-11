@@ -1,15 +1,21 @@
-# Table of Contents
+# ___Keras EfficientNetV2___
+***
+## Table of Contents
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Table of Contents](#table-of-contents)
-- [Basic usage](#basic-usage)
-- [Detailed conversion procedure](#detailed-conversion-procedure)
-- [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
-- [Related Projects](#related-projects)
+- [___Keras EfficientNetV2___](#keras-efficientnetv2)
+	- [Table of Contents](#table-of-contents)
+	- [Summary](#summary)
+	- [Usage](#usage)
+	- [Training detail from article](#training-detail-from-article)
+	- [Detailed conversion procedure](#detailed-conversion-procedure)
+	- [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
+	- [Related Projects](#related-projects)
 
 <!-- /TOC -->
 ***
-# Basic usage
+
+## Summary
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
 
@@ -23,49 +29,51 @@
   | EffNetV2M   | 54.1M | 86.2% | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |[efficientnetv2-m-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k-ft1k.h5)|
   | EffNetV2L   | 119.5M| 86.9% | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |[efficientnetv2-l-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k-ft1k.h5)|
   | EffNetV2XL  | 206.8M| 87.2% | [efficientnetv2-xl-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k.h5)|[efficientnetv2-xl-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k-ft1k.h5)|
-
-  - **Usage** default `input_shape` is set as dynamic `(None, None, 3)`
-    ```py
-    # Load directly
-    model = tf.keras.models.load_model('../models/efficientnetv2/efficientnetv2-b0-21k.h5')
-    ```
-    Or define model and load weights. Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k-ft1k`.
-    ```py
-    # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]. Will download and load `imagenet21k-ft1k` pretrained weights.
-    from keras_efficientnet_v2 import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=21843, classifier_activation=None)
-
-    # Or load weights manually
-    model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=1000, classifier_activation=None, pretrained=None)
-    model.load_weights('../models/efficientnetv2/efficientnetv2-s-imagenet.h5')
-    ```
-    `EfficientNetV2S` / `EfficientNetV2M` / `EfficientNetV2L` / `EfficientNetV2XL` are also added just with the relative `model_type`
-    ```py
-    model = efficientnet_v2.EfficientNetV2M(survivals=0.8, dropout=1e-6, classes=0, classifier_activation=None, pretrained=None)
-
-    model(np.ones([1, 224, 224, 3])).shape
-    # TensorShape([1, 7, 7, 1280])
-    model(np.ones([1, 384, 384, 3])).shape
-    # TensorShape([1, 12, 12, 1280])
-    ```
-    Pip package can be installed as
+## Usage
+  - This repo can be installed as a pip package, or just `git clone` it.
     ```py
     pip install -U git+https://github.com/leondgarse/keras_efficientnet_v2
     ```
-  - **Exclude model top layers** set `calsses=0` to exclude top layers.
+  - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k-ft1k`.
     ```py
-    # Load weights with `by_name=True`. This is the default behavior for `pretrained` not `None`
-    from keras_efficientnet_v2 import efficientnet_v2
-    model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0, pretrained=None)
-    model.load_weights('../models/efficientnetv2/efficientnetv2-l-21k.h5', by_name=True)
+    # `model_type` is one of ["s", "m", "l", "b0", "b1", "b2", "b3"].
+    # Will download and load `imagenet21k-ft1k` pretrained weights.
+    # Model weight is loaded with `by_name=True, skip_mismatch=True`.
+    import keras_efficientnet_v2
+    model = keras_efficientnet_v2.EfficientNetV2S(survivals=None, pretrained="imagenet21k-ft1k")
+
+    # Run prediction
+    from skimage.data import chelsea
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3]) # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 255, 0)).numpy()
+    print(keras.applications.imagenet_utils.decode_predictions(pred)[0])
+    # [('n02124075', 'Egyptian_cat', 0.68835074), ('n02123159', 'tiger_cat', 0.15404259), ...]
     ```
-    Or define a new model from loaded model without head layers
+    Or download h5 model and load directly
     ```py
-    model = tf.keras.models.load_model('../models/efficientnetv2/efficientnetv2-b3-21k-ft1k.h5')
-    # Output layer is `-3` without dropout layer
-    model_notop = tf.keras.models.Model(model.inputs[0], model.layers[-4].output)
-    model_notop.save('efficientnetv2-b3-21k-ft1k-notop.h5')
+    mm = keras.models.load_model('efficientnetv2-b3-21k-ft1k.h5')
     ```
+    For `"imagenet21k"` pre-trained model, actual `num_classes` is `21843`.
+  - **Exclude model top layers** by set `num_classes=0`.
+    ```py
+    import keras_efficientnet_v2
+    model = keras_efficientnet_v2.EfficientNetV2B0(survivals=None, dropout=1e-6, num_classes=0, pretrained="imagenet21k")
+    print(model.output_shape)
+    # (None, 7, 7, 1280)
+
+    model.save('efficientnetv2-b0-21k-notop.h5')
+    ```
+  - **Use dynamic input resolution** by set `input_shape=(None, None, 3)`.
+    ```py
+    import keras_efficientnet_v2
+    model = keras_efficientnet_v2.EfficientNetV2M(input_shape=(None, None, 3), survivals=(1, 0.8), num_classes=0, pretrained="imagenet21k-ft1k")
+
+    print(model(np.ones([1, 224, 224, 3])).shape)
+    # (1, 7, 7, 1280)
+    print(model(np.ones([1, 512, 512, 3])).shape)
+    # (1, 16, 16, 1280)
+    ```
+## Training detail from article
   - EfficientNetV2-S architecture
 
     | Stage | Operator               | Stride | #Channels | #Layers |
@@ -97,7 +105,7 @@
     - Mixup (Zhang et al., 2018)
     - Dropout (Srivastava et al., 2014)
     - and stochastic depth (Huang et al., 2016) with 0.8 survival probability
-# Detailed conversion procedure
+## Detailed conversion procedure
   - [convert_effnetv2_model.py](convert_effnetv2_model.py) is a modified version of [the orignal effnetv2_model.py](https://github.com/google/automl/blob/master/efficientnetv2/effnetv2_model.py). Check detail by `vimdiff convert_effnetv2_model.py ../automl/efficientnetv2/effnetv2_model.py`
     - Delete some `names`, as they may cause confliction in keras.
     - Use `.call` directly calling `se` modules and other blocks, so they will not be `blocks` in `model.summary()`
@@ -112,21 +120,11 @@
     ```
   - **Procedure**
     ```py
+    # See help info
     CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -h
-    # usage: convert_effnetv2_model.py [-h] [-m MODEL_TYPE] [-d DATASET] [-s SAVE_DIR] [-T]
-    # optional arguments:
-    #   -h, --help            show this help message and exit
-    #   -m MODEL_TYPE, --model_type MODEL_TYPE
-    #                         all or value in ['b0', 'b1', 'b2', 'b3', 's', 'm', 'l', 'xl'] (default: s)
-    #   -d DATASET, --dataset DATASET
-    #                         all or value in ['imagenet', 'imagenet21k', 'imagenetft'] (default: imagenet)
-    #   -s SAVE_DIR, --save_dir SAVE_DIR
-    #                         Model save dir (default: ../models/efficientnetv2)
-    #   -T, --dont_save_no_top
-    #                         Dont save no_top model (default: False)
 
     # Convert by specific model_type and dataset type
-    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m xl -d imagenet21k
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m b0 -d imagenet21k
 
     # Convert by specific model_type and all its datasets ['imagenet', 'imagenet21k', 'imagenetft']
     CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m s -d all
@@ -134,23 +132,15 @@
     # Convert all model_types and and all datasets
     CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m all -d all
     ```
-# Progressive train test on cifar10
+## Progressive train test on cifar10
   - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1vmAEfF9tUgK2gkrS5qVftadTyUcX343D?usp=sharing)
   ```py
-  # Exclude model top layers first
-  model = tf.keras.models.load_model('../models/efficientnetv2-s-21k.h5')
-  # Output layer is `-3` without dropout layer
-  model_notop = tf.keras.models.Model(model.inputs[0], model.layers[-4].output)
-  model_notop.save('../models/efficientnetv2-s-21k-notop.h5')
-  ```
-  ```py
+  import keras_efficientnet_v2
   from tensorflow import keras
-  import progressive_train_test
-  from keras_efficientnet_v2 import efficientnet_v2
+  from keras_efficientnet_v2 import progressive_train_test
 
   num_classes = 10
-  ev2_s = efficientnet_v2.EfficientNetV2("s", input_shape=(None, None, 3), classes=0)
-  ev2_s.load_weights("../models/efficientnetv2-s-21k-notop.h5")
+  ev2_s = keras_efficientnet_v2.EfficientNetV2("s", input_shape=(None, None, 3), num_classes=0)
   out = ev2_s.output
 
   nn = keras.layers.GlobalAveragePooling2D(name="avg_pool")(out)
@@ -179,9 +169,7 @@
       json.dump(hhs, ff)
   ```
   ![](cifar10_progressive_train.svg)
-***
-
-# Related Projects
+## Related Projects
   - [tfa.layers.StochasticDepth](https://www.tensorflow.org/addons/api_docs/python/tfa/layers/StochasticDepth)
   - [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2)
 ***
