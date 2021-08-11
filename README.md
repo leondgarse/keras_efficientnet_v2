@@ -15,14 +15,14 @@
 
   | Model       | Params |1K Top1 acc | ImageNet21K weight | Imagenet21k-ft1k weight |
   | ----------- | ----- | -------- | ------------------ | ----------------------- |
-  | EffNetV2-B0 | 7.1M  | 78.7% | [efficientnetv2-b0-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-21k.h5)|[efficientnetv2-b0-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-21k-ft1k.h5)|
-  | EffNetV2-B1 | 8.1M  | 79.8% | [efficientnetv2-b1-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-21k.h5)|[efficientnetv2-b1-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-21k-ft1k.h5)|
-  | EffNetV2-B2 | 10.1M | 80.5% | [efficientnetv2-b2-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-21k.h5)|[efficientnetv2-b2-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-21k-ft1k.h5)|
-  | EffNetV2-B3 | 14.4M | 82.1% | [efficientnetv2-b3-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-21k.h5)|[efficientnetv2-b3-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-21k-ft1k.h5)|
-  | EffNetV2S   | 21.5M | 84.9% | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |[efficientnetv2-s-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k-ft1k.h5)|
-  | EffNetV2M   | 54.1M | 86.2% | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |[efficientnetv2-m-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k-ft1k.h5)|
-  | EffNetV2L   | 119.5M| 86.9% | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |[efficientnetv2-l-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k-ft1k.h5)|
-  | EffNetV2XL  | 206.8M| 87.2% | [efficientnetv2-xl-21k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k.h5)|[efficientnetv2-xl-21k-ft1k.h5](https://github.com/leondgarse/Keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k-ft1k.h5)|
+  | EffNetV2-B0 | 7.1M  | 78.7% | [efficientnetv2-b0-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-21k.h5)|[efficientnetv2-b0-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b0-21k-ft1k.h5)|
+  | EffNetV2-B1 | 8.1M  | 79.8% | [efficientnetv2-b1-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-21k.h5)|[efficientnetv2-b1-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b1-21k-ft1k.h5)|
+  | EffNetV2-B2 | 10.1M | 80.5% | [efficientnetv2-b2-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-21k.h5)|[efficientnetv2-b2-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b2-21k-ft1k.h5)|
+  | EffNetV2-B3 | 14.4M | 82.1% | [efficientnetv2-b3-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-21k.h5)|[efficientnetv2-b3-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-b3-21k-ft1k.h5)|
+  | EffNetV2S   | 21.5M | 84.9% | [efficientnetv2-s-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k.h5) |[efficientnetv2-s-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-s-21k-ft1k.h5)|
+  | EffNetV2M   | 54.1M | 86.2% | [efficientnetv2-m-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k.h5) |[efficientnetv2-m-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-m-21k-ft1k.h5)|
+  | EffNetV2L   | 119.5M| 86.9% | [efficientnetv2-l-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k.h5) |[efficientnetv2-l-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-l-21k-ft1k.h5)|
+  | EffNetV2XL  | 206.8M| 87.2% | [efficientnetv2-xl-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k.h5)|[efficientnetv2-xl-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-xl-21k-ft1k.h5)|
 
   - **Usage** default `input_shape` is set as dynamic `(None, None, 3)`
     ```py
@@ -32,7 +32,7 @@
     Or define model and load weights. Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k-ft1k`.
     ```py
     # model_type is one of ["s", "m", "l", "b0", "b1", "b2", "b3"]. Will download and load `imagenet21k-ft1k` pretrained weights.
-    from Keras_efficientnet_v2 import efficientnet_v2
+    from keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2(model_type="s", survivals=None, dropout=0.2, classes=21843, classifier_activation=None)
 
     # Or load weights manually
@@ -50,12 +50,12 @@
     ```
     Pip package can be installed as
     ```py
-    pip install -U git+https://github.com/leondgarse/Keras_efficientnet_v2
+    pip install -U git+https://github.com/leondgarse/keras_efficientnet_v2
     ```
   - **Exclude model top layers** set `calsses=0` to exclude top layers.
     ```py
     # Load weights with `by_name=True`. This is the default behavior for `pretrained` not `None`
-    from Keras_efficientnet_v2 import efficientnet_v2
+    from keras_efficientnet_v2 import efficientnet_v2
     model = efficientnet_v2.EfficientNetV2L(input_shape=(224, 224, 3), survivals=None, dropout=1e-6, classes=0, pretrained=None)
     model.load_weights('../models/efficientnetv2/efficientnetv2-l-21k.h5', by_name=True)
     ```
@@ -108,7 +108,7 @@
     ```sh
     ../
     ├── automl  # Official repo
-    ├── Keras_efficientnet_v2  # This one
+    ├── keras_efficientnet_v2  # This one
     ```
   - **Procedure**
     ```py
@@ -146,7 +146,7 @@
   ```py
   from tensorflow import keras
   import progressive_train_test
-  from Keras_efficientnet_v2 import efficientnet_v2
+  from keras_efficientnet_v2 import efficientnet_v2
 
   num_classes = 10
   ev2_s = efficientnet_v2.EfficientNetV2("s", input_shape=(None, None, 3), classes=0)

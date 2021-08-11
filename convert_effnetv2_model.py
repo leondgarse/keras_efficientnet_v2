@@ -807,7 +807,7 @@ if __name__ == "__main__":
     import datasets as orign_datasets
     import effnetv2_model as orign_effnetv2_model
 
-    from Keras_efficientnet_v2 import efficientnet_v2 as keras_efficientnet_v2
+    from keras_efficientnet_v2 import efficientnet_v2 as keras_efficientnet_v2
 
     """ Parameters """
     model_type_list = [args.model_type] if args.model_type != "all" else all_model_types
