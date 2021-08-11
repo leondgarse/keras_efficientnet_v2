@@ -36,7 +36,6 @@
     ```
   - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k-ft1k`.
     ```py
-    # `model_type` is one of ["s", "m", "l", "b0", "b1", "b2", "b3"].
     # Will download and load `imagenet21k-ft1k` pretrained weights.
     # Model weight is loaded with `by_name=True, skip_mismatch=True`.
     import keras_efficientnet_v2
@@ -49,7 +48,7 @@
     print(keras.applications.imagenet_utils.decode_predictions(pred)[0])
     # [('n02124075', 'Egyptian_cat', 0.68835074), ('n02123159', 'tiger_cat', 0.15404259), ...]
     ```
-    Or download h5 model and load directly
+    Or download `h5` model and load directly
     ```py
     mm = keras.models.load_model('efficientnetv2-b3-21k-ft1k.h5')
     ```
