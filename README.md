@@ -112,7 +112,7 @@
     ```
   - **Procedure**
     ```py
-    CUDA_VISIBLE_DEVICES='-1' python Keras_efficientnet_v2/convert_effnetv2_model.py -h
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -h
     # usage: convert_effnetv2_model.py [-h] [-m MODEL_TYPE] [-d DATASET] [-s SAVE_DIR] [-T]
     # optional arguments:
     #   -h, --help            show this help message and exit
@@ -126,13 +126,13 @@
     #                         Dont save no_top model (default: False)
 
     # Convert by specific model_type and dataset type
-    CUDA_VISIBLE_DEVICES='-1' python Keras_efficientnet_v2/convert_effnetv2_model.py -m xl -d imagenet21k
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m xl -d imagenet21k
 
     # Convert by specific model_type and all its datasets ['imagenet', 'imagenet21k', 'imagenetft']
-    CUDA_VISIBLE_DEVICES='-1' python Keras_efficientnet_v2/convert_effnetv2_model.py -m s -d all
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m s -d all
 
     # Convert all model_types and and all datasets
-    CUDA_VISIBLE_DEVICES='-1' python Keras_efficientnet_v2/convert_effnetv2_model.py -m all -d all
+    CUDA_VISIBLE_DEVICES='-1' python convert_effnetv2_model.py -m all -d all
     ```
 # Progressive train test on cifar10
   - [Colab efficientnetV2_basic_test.ipynb](https://colab.research.google.com/drive/1vmAEfF9tUgK2gkrS5qVftadTyUcX343D?usp=sharing)
