@@ -835,7 +835,7 @@ if __name__ == "__main__":
             print(">>>> classes = {}, dropout = {}, load_weights = {}, save_model_suffix = {}".format(classes, dropout, load_weights, save_model_suffix))
 
             """ Define Keras model first just to keep the names start from `0` """
-            keras_model = keras_efficientnet_v2.EfficientNetV2(model_type=model_type, survivals=None, dropout=dropout, num_classes=classes, classifier_activation=None, pretrained=None)
+            keras_model = keras_efficientnet_v2.EfficientNetV2(model_type=model_type, drop_connect_rate=0, dropout=dropout, num_classes=classes, classifier_activation=None, pretrained=None)
 
             """ Load checkpoints using official defination """
             cc = orign_datasets.get_dataset_config(dataset)

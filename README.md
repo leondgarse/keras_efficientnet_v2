@@ -39,9 +39,11 @@
     # Will download and load `imagenet` pretrained weights.
     # Model weight is loaded with `by_name=True, skip_mismatch=True`.
     import keras_efficientnet_v2
-    model = keras_efficientnet_v2.EfficientNetV2S(survivals=None, pretrained="imagenet")
+    model = keras_efficientnet_v2.EfficientNetV2S(pretrained="imagenet")
 
     # Run prediction
+    import tensorflow as tf
+    from tensorflow import keras
     from skimage.data import chelsea
     imm = tf.image.resize(chelsea(), model.input_shape[1:3]) # Chelsea the cat
     pred = model(tf.expand_dims(imm / 255, 0)).numpy()
@@ -56,7 +58,7 @@
   - **Exclude model top layers** by set `num_classes=0`.
     ```py
     import keras_efficientnet_v2
-    model = keras_efficientnet_v2.EfficientNetV2B0(survivals=None, dropout=1e-6, num_classes=0, pretrained="imagenet21k")
+    model = keras_efficientnet_v2.EfficientNetV2B0(dropout=1e-6, num_classes=0, pretrained="imagenet21k")
     print(model.output_shape)
     # (None, 7, 7, 1280)
 
@@ -65,7 +67,7 @@
   - **Use dynamic input resolution** by set `input_shape=(None, None, 3)`.
     ```py
     import keras_efficientnet_v2
-    model = keras_efficientnet_v2.EfficientNetV2M(input_shape=(None, None, 3), survivals=(1, 0.8), num_classes=0, pretrained="imagenet21k-ft1k")
+    model = keras_efficientnet_v2.EfficientNetV2M(input_shape=(None, None, 3), drop_connect_rate=0.2, num_classes=0, pretrained="imagenet21k-ft1k")
 
     print(model(np.ones([1, 224, 224, 3])).shape)
     # (1, 7, 7, 1280)

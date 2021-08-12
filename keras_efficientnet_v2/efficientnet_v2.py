@@ -158,7 +158,7 @@ def se_module(inputs, se_ratio=4, name=""):
     return Multiply()([inputs, se])
 
 
-def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None, use_se=0, is_fused=False, name=""):
+def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, drop_rate=0, use_se=0, is_fused=False, name=""):
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     input_channel = inputs.shape[channel_axis]
 
@@ -187,12 +187,9 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, survival=None
         nn = batchnorm_with_activation(nn, activation=None, name=name + "MB_pw_")
 
     if shortcut:
-        if survival is not None and survival < 1:
-            from tensorflow_addons.layers import StochasticDepth
-
-            return StochasticDepth(float(survival))([inputs, nn])
-        else:
-            return Add()([inputs, nn])
+        if drop_rate > 0:
+            nn = Dropout(drop_rate, noise_shape=(None, 1, 1, 1), name=name + "drop")(nn)
+        return Add()([inputs, nn])
     else:
         return nn
 
@@ -203,7 +200,7 @@ def EfficientNetV2(
     num_classes=1000,
     dropout=0.2,
     first_strides=2,
-    survivals=None,
+    drop_connect_rate=0,
     classifier_activation="softmax",
     pretrained="imagenet21k-ft1k",
     model_name="EfficientNetV2",
@@ -223,27 +220,20 @@ def EfficientNetV2(
     nn = conv2d_no_bias(inputs, out_channel, (3, 3), strides=first_strides, padding="same", name="stem_")
     nn = batchnorm_with_activation(nn, name="stem_")
 
-    # StochasticDepth survival_probability values
-    total_layers = sum(depthes)
-    if isinstance(survivals, float):
-        survivals = [survivals] * total_layers
-    elif isinstance(survivals, (list, tuple)) and len(survivals) == 2:
-        start, end = survivals
-        survivals = [start - (1 - end) * float(ii) / total_layers for ii in range(total_layers)]
-    else:
-        survivals = [None] * total_layers
-    survivals = [survivals[int(sum(depthes[:id])) : sum(depthes[: id + 1])] for id in range(len(depthes))]
-
     pre_out = out_channel
-    for id, (expand, out_channel, depth, survival, stride, se) in enumerate(zip(expands, out_channels, depthes, survivals, strides, use_ses)):
+    global_block_id = 0
+    total_blocks = sum(depthes)
+    for id, (expand, out_channel, depth, stride, se) in enumerate(zip(expands, out_channels, depthes, strides, use_ses)):
         out = _make_divisible(out_channel, 8)
         is_fused = True if se == 0 else False
         for block_id in range(depth):
             stride = stride if block_id == 0 else 1
             shortcut = True if out == pre_out and stride == 1 else False
             name = "stack_{}_block{}_".format(id, block_id)
-            nn = MBConv(nn, out, stride, expand, shortcut, survival[block_id], se, is_fused, name=name)
+            drop_rate = drop_connect_rate * global_block_id / total_blocks
+            nn = MBConv(nn, out, stride, expand, shortcut, drop_rate, se, is_fused, name=name)
             pre_out = out
+            global_block_id += 1
 
     output_conv_filter = _make_divisible(output_conv_filter, 8)
     nn = conv2d_no_bias(nn, output_conv_filter, (1, 1), strides=(1, 1), padding="valid", name="post_")
@@ -312,6 +302,4 @@ def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, c
 
 
 def get_actual_survival_probabilities(model):
-    from tensorflow_addons.layers import StochasticDepth
-
-    return [ii.survival_probability for ii in model.layers if isinstance(ii, StochasticDepth)]
+    return [ii.rate for ii in model.layers if isinstance(ii, keras.layers.Dropout)]
