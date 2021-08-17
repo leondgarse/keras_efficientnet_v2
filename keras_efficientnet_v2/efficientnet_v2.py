@@ -230,8 +230,8 @@ def EfficientNetV2(
             stride = stride if block_id == 0 else 1
             shortcut = True if out == pre_out and stride == 1 else False
             name = "stack_{}_block{}_".format(id, block_id)
-            drop_rate = drop_connect_rate * global_block_id / total_blocks
-            nn = MBConv(nn, out, stride, expand, shortcut, drop_rate, se, is_fused, name=name)
+            block_drop_rate = drop_connect_rate * global_block_id / total_blocks
+            nn = MBConv(nn, out, stride, expand, shortcut, block_drop_rate, se, is_fused, name=name)
             pre_out = out
             global_block_id += 1
 
@@ -245,7 +245,7 @@ def EfficientNetV2(
             nn = Dropout(dropout)(nn)
         nn = Dense(num_classes, activation=classifier_activation, name="predictions")(nn)
 
-    model = Model(inputs=inputs, outputs=nn, name=name)
+    model = Model(inputs=inputs, outputs=nn, name=model_name)
     reload_model_weights(model, model_type, pretrained)
     return model
 
@@ -253,7 +253,7 @@ def EfficientNetV2(
 def reload_model_weights(model, model_type, pretrained="imagenet"):
     pretrained_dd = {"imagenet": "imagenet", "imagenet21k": "21k", "imagenet21k-ft1k": "21k-ft1k"}
     if not pretrained in pretrained_dd:
-        print(">>>> No pretraind available, model will be random initialized")
+        print(">>>> No pretraind available, model will be randomly initialized")
         return
 
     pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-{}-{}.h5"
@@ -301,5 +301,5 @@ def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, c
     return EfficientNetV2(model_type="xl", model_name="EfficientNetV2XL", **locals(), **kwargs)
 
 
-def get_actual_survival_probabilities(model):
+def get_actual_drop_connect_rates(model):
     return [ii.rate for ii in model.layers if isinstance(ii, keras.layers.Dropout)]
