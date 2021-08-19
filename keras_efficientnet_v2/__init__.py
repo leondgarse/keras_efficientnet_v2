@@ -4,6 +4,7 @@ from keras_efficientnet_v2.efficientnet_v2 import (
     EfficientNetV2B1,
     EfficientNetV2B2,
     EfficientNetV2B3,
+    EfficientNetV2T,
     EfficientNetV2S,
     EfficientNetV2M,
     EfficientNetV2L,
@@ -36,7 +37,7 @@ Returns:
 
 EfficientNetV2.__doc__ = __head_doc__ + """
 Args:
-  model_type: is the pre-defined model, value in ["s", "m", "l", "b0", "b1", "b2", "b3"].
+  model_type: is the pre-defined model, value in ["t", "s", "m", "l", "b0", "b1", "b2", "b3"].
   model_name: string, model name.
 """ + __tail_doc__ + """
 Model architectures:
@@ -46,6 +47,7 @@ Model architectures:
   | EfficientNetV2B1  | 8.1M   | 79.8%       |
   | EfficientNetV2B2  | 10.1M  | 80.5%       |
   | EfficientNetV2B3  | 14.4M  | 82.1%       |
+  | EfficientNetV2T   | 13.6M  | 82.5%       |
   | EfficientNetV2BS  | 21.5M  | 84.9%       |
   | EfficientNetV2BM  | 54.1M  | 86.2%       |
   | EfficientNetV2BL  | 119.5M | 86.9%       |
@@ -59,6 +61,7 @@ Args:
 EfficientNetV2B1.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2B2.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2B3.__doc__ = EfficientNetV2B0.__doc__
+EfficientNetV2T.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2S.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2M.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2L.__doc__ = EfficientNetV2B0.__doc__
