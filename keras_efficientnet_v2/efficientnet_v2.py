@@ -295,7 +295,7 @@ def EfficientNetV2B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, c
     return EfficientNetV2(model_type="b3", model_name="EfficientNetV2B3", **locals(), **kwargs)
 
 
-def EfficientNetV2T(input_shape=(320, 320, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2T(input_shape=(320, 320, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="t", model_name="EfficientNetV2T", **locals(), **kwargs)
 
 

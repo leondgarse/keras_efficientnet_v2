@@ -18,7 +18,7 @@
 ## Summary
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
-  - `effv2-t-imagenet.h5` model weights converted from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021). which claimed both faster and better accuracy than `b3`. Please notice that `PyTorch` using different `bn_epsilon` and `padding` strategy, so this converted outputs is a little different with `PyTorch` version.
+  - `effv2-t-imagenet.h5` model weights converted from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021). which claimed both faster and better accuracy than `b3`. Please notice that `PyTorch` using different `bn_epsilon` and `padding` strategy, so this converted outputs is a little different from `PyTorch` version.
 
   | Model       | Params | Top1 acc | ImageNet21K | Imagenet21k-ft1k | Imagenet |
   | ----------- | ------ | -------- | ----------- | ---------------- | -------- |
