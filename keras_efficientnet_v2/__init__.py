@@ -48,10 +48,10 @@ Model architectures:
   | EfficientNetV2B2  | 10.1M  | 80.5%       |
   | EfficientNetV2B3  | 14.4M  | 82.1%       |
   | EfficientNetV2T   | 13.6M  | 82.5%       |
-  | EfficientNetV2BS  | 21.5M  | 84.9%       |
-  | EfficientNetV2BM  | 54.1M  | 86.2%       |
-  | EfficientNetV2BL  | 119.5M | 86.9%       |
-  | EfficientNetV2BXL | 206.8M | 87.2%       |
+  | EfficientNetV2S   | 21.5M  | 84.9%       |
+  | EfficientNetV2M   | 54.1M  | 86.2%       |
+  | EfficientNetV2L   | 119.5M | 86.9%       |
+  | EfficientNetV2XL  | 206.8M | 87.2%       |
 """
 
 EfficientNetV2B0.__doc__ = __head_doc__ + """
@@ -61,7 +61,10 @@ Args:
 EfficientNetV2B1.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2B2.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2B3.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2T.__doc__ = EfficientNetV2B0.__doc__
+EfficientNetV2T.__doc__ = __head_doc__ + """Architecture and weights from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021).
+
+Args:
+""" + __tail_doc__
 EfficientNetV2S.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2M.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2L.__doc__ = EfficientNetV2B0.__doc__
