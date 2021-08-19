@@ -64,6 +64,15 @@ BLOCK_CONFIGS = {
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
+    "t": {  # width 1.4 * 0.8, depth 1.8 * 0.9, from timm
+        "first_conv_filter": 24,
+        "output_conv_filter": 1024,
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [24, 40, 48, 104, 128, 208],
+        "depthes": [2, 4, 4, 6, 9, 14],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
     "s": {  # width 1.4, depth 1.8
         "first_conv_filter": 24,
         "output_conv_filter": 1280,
@@ -172,7 +181,8 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, drop_rate=0, 
         nn = inputs
 
     if not is_fused:
-        nn = DepthwiseConv2D((3, 3), padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw_")(nn)
+        # nn = keras.layers.ZeroPadding2D(padding=1, name=name + "pad")(nn)
+        nn = DepthwiseConv2D((3, 3), padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw")(nn)
         nn = batchnorm_with_activation(nn, name=name + "MB_dw_")
 
     if use_se:
@@ -283,6 +293,10 @@ def EfficientNetV2B2(input_shape=(260, 260, 3), num_classes=1000, dropout=0.3, c
 
 def EfficientNetV2B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
     return EfficientNetV2(model_type="b3", model_name="EfficientNetV2B3", **locals(), **kwargs)
+
+
+def EfficientNetV2T(input_shape=(320, 320, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+    return EfficientNetV2(model_type="t", model_name="EfficientNetV2T", **locals(), **kwargs)
 
 
 def EfficientNetV2S(input_shape=(384, 384, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
