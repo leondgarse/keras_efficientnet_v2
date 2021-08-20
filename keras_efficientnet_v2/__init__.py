@@ -27,7 +27,7 @@ __tail_doc__ = """  input_shape: it should have exactly 3 inputs channels. Set `
   classifier_activation: A `str` or callable. The activation function to use on the "top" layer if `num_classes > 0`.
       Set `classifier_activation=None` to return the logits of the "top" layer.
       Default is `softmax`.
-  pretrained: value in [None, "imagenet", "imagenet21k", "imagenet21k-ft1k"].
+  pretrained: value in {pretrained}.
       Will try to download and load pre-trained model weights if not None.
       Save path is `~/.keras/models/efficientnetv2/`.
 
@@ -39,7 +39,7 @@ EfficientNetV2.__doc__ = __head_doc__ + """
 Args:
   model_type: is the pre-defined model, value in ["t", "s", "m", "l", "b0", "b1", "b2", "b3"].
   model_name: string, model name.
-""" + __tail_doc__ + """
+""" + __tail_doc__.format(pretrained=[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]) + """
 Model architectures:
   | Model             | Params | 1K Top1 acc |
   | ----------------- | ------ | ----------- |
@@ -56,7 +56,7 @@ Model architectures:
 
 EfficientNetV2B0.__doc__ = __head_doc__ + """
 Args:
-""" + __tail_doc__
+""" + __tail_doc__.format(pretrained=[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"])
 
 EfficientNetV2B1.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2B2.__doc__ = EfficientNetV2B0.__doc__
@@ -64,7 +64,7 @@ EfficientNetV2B3.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2T.__doc__ = __head_doc__ + """Architecture and weights from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021).
 
 Args:
-""" + __tail_doc__
+""" + __tail_doc__.format(pretrained=[None, "imagenet"])
 EfficientNetV2S.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2M.__doc__ = EfficientNetV2B0.__doc__
 EfficientNetV2L.__doc__ = EfficientNetV2B0.__doc__
