@@ -266,7 +266,7 @@ def reload_model_weights(model, model_type, pretrained="imagenet"):
         print(">>>> No pretraind available, model will be randomly initialized")
         return
 
-    pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/v1.0.0/efficientnetv2-{}-{}.h5"
+    pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-{}-{}.h5"
     url = pre_url.format(model_type, pretrained_dd[pretrained])
     file_name = os.path.basename(url)
     try:
