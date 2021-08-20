@@ -212,7 +212,7 @@ def EfficientNetV2(
     first_strides=2,
     drop_connect_rate=0,
     classifier_activation="softmax",
-    pretrained="imagenet21k-ft1k",
+    pretrained="imagenet",
     model_name="EfficientNetV2",
     kwargs=None,    # Not used, just recieving parameter
 ):
@@ -253,7 +253,7 @@ def EfficientNetV2(
         nn = GlobalAveragePooling2D(name="avg_pool")(nn)
         if dropout > 0 and dropout < 1:
             nn = Dropout(dropout)(nn)
-        nn = Dense(num_classes, activation=classifier_activation, name="predictions")(nn)
+        nn = Dense(num_classes, activation=classifier_activation, dtype="float32", name="predictions")(nn)
 
     model = Model(inputs=inputs, outputs=nn, name=model_name)
     reload_model_weights(model, model_type, pretrained)
@@ -279,19 +279,19 @@ def reload_model_weights(model, model_type, pretrained="imagenet"):
         model.load_weights(pretrained_model, by_name=True, skip_mismatch=True)
 
 
-def EfficientNetV2B0(input_shape=(224, 224, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2B0(input_shape=(224, 224, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="b0", model_name="EfficientNetV2B0", **locals(), **kwargs)
 
 
-def EfficientNetV2B1(input_shape=(240, 240, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2B1(input_shape=(240, 240, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="b1", model_name="EfficientNetV2B1", **locals(), **kwargs)
 
 
-def EfficientNetV2B2(input_shape=(260, 260, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2B2(input_shape=(260, 260, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="b2", model_name="EfficientNetV2B2", **locals(), **kwargs)
 
 
-def EfficientNetV2B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="b3", model_name="EfficientNetV2B3", **locals(), **kwargs)
 
 
@@ -299,19 +299,19 @@ def EfficientNetV2T(input_shape=(320, 320, 3), num_classes=1000, dropout=0.2, cl
     return EfficientNetV2(model_type="t", model_name="EfficientNetV2T", **locals(), **kwargs)
 
 
-def EfficientNetV2S(input_shape=(384, 384, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2S(input_shape=(384, 384, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="s", model_name="EfficientNetV2S", **locals(), **kwargs)
 
 
-def EfficientNetV2M(input_shape=(480, 480, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2M(input_shape=(480, 480, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="m", model_name="EfficientNetV2M", **locals(), **kwargs)
 
 
-def EfficientNetV2L(input_shape=(480, 480, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2L(input_shape=(480, 480, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="l", model_name="EfficientNetV2L", **locals(), **kwargs)
 
 
-def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
+def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="xl", model_name="EfficientNetV2XL", **locals(), **kwargs)
 
 

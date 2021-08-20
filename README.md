@@ -36,7 +36,7 @@
     ```py
     pip install -U git+https://github.com/leondgarse/keras_efficientnet_v2
     ```
-  - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet21k-ft1k`.
+  - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet`.
     ```py
     # Will download and load `imagenet` pretrained weights.
     # Model weight is loaded with `by_name=True, skip_mismatch=True`.
@@ -142,24 +142,13 @@
   from tensorflow import keras
   from keras_efficientnet_v2 import progressive_train_test
 
-  num_classes = 10
-  ev2_s = keras_efficientnet_v2.EfficientNetV2("s", input_shape=(None, None, 3), num_classes=0)
-  out = ev2_s.output
-
-  nn = keras.layers.GlobalAveragePooling2D(name="avg_pool")(out)
-  nn = keras.layers.Dropout(0.1)(nn)
-  nn = keras.layers.Dense(num_classes, activation="softmax", name="predictions", dtype="float32")(nn)
-  model = keras.models.Model(ev2_s.inputs[0], nn)
-
-  lr_scheduler = None
-  optimizer = "adam"
-  loss = "categorical_crossentropy"
-  model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
+  model = keras_efficientnet_v2.EfficientNetV2S(input_shape=(None, None, 3), num_classes=10, classifier_activation='softmax', dropout=0.1)
+  model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
   hhs = progressive_train_test.progressive_with_dropout_randaug(
       model,
       data_name="cifar10",
-      lr_scheduler=lr_scheduler,
+      lr_scheduler=None,
       total_epochs=36,
       batch_size=64,
       dropout_layer=-2,
