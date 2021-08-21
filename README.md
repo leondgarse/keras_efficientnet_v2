@@ -34,6 +34,8 @@
 ## Usage
   - This repo can be installed as a pip package, or just `git clone` it.
     ```py
+    pip install -U keras-efficientnet-v2
+    # Or
     pip install -U git+https://github.com/leondgarse/keras_efficientnet_v2
     ```
   - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet`.
@@ -91,6 +93,7 @@
     | 7     | Conv1x1 & Pooling & FC | -      | 1280      | 1       |
 
   - Progressive training settings for EfficientNetV2
+  
     |              | S min | S max | M min | M max | L min | M max |
     | ------------ | ----- | ----- | ----- | ----- | ----- | ----- |
     | Image Size   | 128   | 300   | 128   | 380   | 128   | 380   |
