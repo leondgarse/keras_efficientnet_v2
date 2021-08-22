@@ -182,7 +182,7 @@ def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, drop_rate=0, 
 
     if not is_fused:
         # nn = keras.layers.ZeroPadding2D(padding=1, name=name + "pad")(nn)
-        nn = DepthwiseConv2D((3, 3), padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw")(nn)
+        nn = DepthwiseConv2D((3, 3), padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw_")(nn)
         nn = batchnorm_with_activation(nn, name=name + "MB_dw_")
 
     if use_se:
