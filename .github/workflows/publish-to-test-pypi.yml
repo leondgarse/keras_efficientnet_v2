@@ -2,22 +2,6 @@ name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
 
 on: push
 
-predict_test_script = '
-import keras_efficientnet_v2
-model = keras_efficientnet_v2.EfficientNetV2S(pretrained="imagenet")
-
-# Run prediction
-import tensorflow as tf
-from tensorflow import keras
-from skimage.data import chelsea
-imm = tf.image.resize(chelsea(), model.input_shape[1:3]) # Chelsea the cat
-pred = model(tf.expand_dims(imm / 255, 0)).numpy()
-print(keras.applications.imagenet_utils.decode_predictions(pred)[0])
-# [('n02124075', 'Egyptian_cat', 0.89163685), ('n02123045', 'tabby', 0.01682318), ...]
-out = keras.applications.imagenet_utils.decode_predictions(pred)[0]
-assert (out[0][-1] - 0.89163685) < 1e-5
-'
-
 jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
@@ -41,10 +25,7 @@ jobs:
         --sdist
         --wheel
         --outdir dist/
-    - name: Run prediction test
-      run: >-
-        pip install scikit-image
-        CUDA_VISIBLE_DEVICES='-1' python -c ${{ predict_test_script }}
+        .
     - name: Publish distribution 📦 to Test PyPI
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
