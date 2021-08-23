@@ -111,6 +111,18 @@ BLOCK_CONFIGS = {
     },
 }
 
+FILE_HASH_DICT = {
+    "b0": {"21k-ft1k": "4e4da4eb629897e4d6271e131039fe75", "21k": "5dbb4252df24b931e74cdd94d150f25a", "imagenet": "9abdc43cb00f4cb06a8bdae881f412d6"},
+    "b1": {"21k-ft1k": "5f1aee82209f4f0f20bd24460270564e", "21k": "a50ae65b50ceff7f5283be2f4506d2c2", "imagenet": "5d4223b59ff268828d5112a1630e234e"},
+    "b2": {"21k-ft1k": "ec384b84441ddf6419938d1e5a0cbef2", "21k": "9f718a8bbb7b63c5313916c5e504790d", "imagenet": "1814bc08d4bb7a5e0ed3ccfe1cf18650"},
+    "b3": {"21k-ft1k": "4a27827b0b2df508bed31ae231003bb1", "21k": "ade5bdbbdf1d54c4561aa41511525855", "imagenet": "cda85b8494c7ec5a68dffb335a254bab"},
+    "l": {"21k-ft1k": "30327edcf1390d10e9a0de42a2d731e3", "21k": "7970f913eec1b4918e007c8580726412", "imagenet": "2b65f5789f4d2f1bf66ecd6d9c5c2d46"},
+    "m": {"21k-ft1k": "0c236c3020e3857de1e5f2939abd0cc6", "21k": "3923c286366b2a5137f39d1e5b14e202", "imagenet": "ac3fd0ff91b35d18d1df8f1895efe1d5"},
+    "s": {"21k-ft1k": "93046a0d601da46bfce9d4ca14224c83", "21k": "10b05d878b64f796ab984a5316a4a1c3", "imagenet": "3b91df2c50c7a56071cca428d53b8c0d"},
+    "t": {"imagenet": "46632458117102758518158bf35444d7"},
+    "xl": {"21k-ft1k": "9aaa2bd3c9495b23357bc6593eee5bce", "21k": "c97de2770f55701f788644336181e8ee"},
+}
+
 
 def _make_divisible(v, divisor=4, min_value=None):
     """
@@ -214,7 +226,7 @@ def EfficientNetV2(
     classifier_activation="softmax",
     pretrained="imagenet",
     model_name="EfficientNetV2",
-    kwargs=None,    # Not used, just recieving parameter
+    kwargs=None,  # Not used, just recieving parameter
 ):
     blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
@@ -266,11 +278,14 @@ def reload_model_weights(model, model_type, pretrained="imagenet"):
         print(">>>> No pretraind available, model will be randomly initialized")
         return
 
+    pre_tt = pretrained_dd[pretrained]
     pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-{}-{}.h5"
-    url = pre_url.format(model_type, pretrained_dd[pretrained])
+    url = pre_url.format(model_type, pre_tt)
     file_name = os.path.basename(url)
+    file_hash = FILE_HASH_DICT[model_type][pre_tt]
+
     try:
-        pretrained_model = keras.utils.get_file(file_name, url, cache_subdir="models/efficientnetv2")
+        pretrained_model = keras.utils.get_file(file_name, url, cache_subdir="models/efficientnetv2", file_hash=file_hash)
     except:
         print("[Error] will not load weights, url not found or download failed:", url)
         return
