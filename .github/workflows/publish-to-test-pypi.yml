@@ -16,7 +16,7 @@ jobs:
       run: >-
         python -m
         pip install
-        build
+        build pytest pytest-timeout
         --user
     - name: Build a binary wheel and a source tarball
       run: >-
@@ -26,6 +26,11 @@ jobs:
         --wheel
         --outdir dist/
         .
+    - name: Run predict tests
+      env:
+        LD_PRELOAD: /usr/lib/x86_64-linux-gnu/libtcmalloc.so.4
+      run: >-
+        CUDA_VISIBLE_DEVICES='-1' pytest -vv --durations=0 ./tests
     - name: Publish distribution 📦 to Test PyPI
       if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
