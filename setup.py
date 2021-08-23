@@ -14,7 +14,7 @@ exec(open('keras_efficientnet_v2/version.py').read())
 setup(
     name="keras-efficientnet-v2",
     version=__version__,
-    description="(Unofficial) keras efficientnet v2",
+    description="(Unofficial) tensorflow keras efficientnet v2 with pre-trained",
     long_description=long_description,
     long_description_content_type='text/markdown',
     url="https://github.com/leondgarse/keras_efficientnet_v2",
