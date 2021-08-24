@@ -277,8 +277,11 @@ def reload_model_weights(model, model_type, pretrained="imagenet"):
     if not pretrained in pretrained_dd:
         print(">>>> No pretraind available, model will be randomly initialized")
         return
-
     pre_tt = pretrained_dd[pretrained]
+    if model_type not in FILE_HASH_DICT or pre_tt not in FILE_HASH_DICT[model_type]:
+        print(">>>> No pretraind available, model will be randomly initialized")
+        return
+
     pre_url = "https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-{}-{}.h5"
     url = pre_url.format(model_type, pre_tt)
     file_name = os.path.basename(url)
