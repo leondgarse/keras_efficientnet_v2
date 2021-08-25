@@ -38,7 +38,7 @@
     # Or
     pip install -U git+https://github.com/leondgarse/keras_efficientnet_v2
     ```
-  - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet`.
+  - **Define model and load pretrained weights** Parameter `pretrained` is added in value `[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]`, default is `imagenet`. Model input value should be in range `[-1, 1]`.
     ```py
     # Will download and load `imagenet` pretrained weights.
     # Model weight is loaded with `by_name=True, skip_mismatch=True`.
@@ -50,9 +50,9 @@
     from tensorflow import keras
     from skimage.data import chelsea
     imm = tf.image.resize(chelsea(), model.input_shape[1:3]) # Chelsea the cat
-    pred = model(tf.expand_dims(imm / 255, 0)).numpy()
+    pred = model(tf.expand_dims(imm / 128. - 1., 0)).numpy()
     print(keras.applications.imagenet_utils.decode_predictions(pred)[0])
-    # [('n02124075', 'Egyptian_cat', 0.89163685), ('n02123045', 'tabby', 0.01682318), ...]
+    # [('n02124075', 'Egyptian_cat', 0.8642886), ('n02123159', 'tiger_cat', 0.030793495), ...]
     ```
     Or download `h5` model and load directly
     ```py
@@ -93,7 +93,7 @@
     | 7     | Conv1x1 & Pooling & FC | -      | 1280      | 1       |
 
   - Progressive training settings for EfficientNetV2
-  
+
     |              | S min | S max | M min | M max | L min | M max |
     | ------------ | ----- | ----- | ----- | ----- | ----- | ----- |
     | Image Size   | 128   | 300   | 128   | 380   | 128   | 380   |
