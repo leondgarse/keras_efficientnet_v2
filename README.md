@@ -4,13 +4,13 @@
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [___Keras EfficientNetV2___](#keras-efficientnetv2)
-	- [Table of Contents](#table-of-contents)
-	- [Summary](#summary)
-	- [Usage](#usage)
-	- [Training detail from article](#training-detail-from-article)
-	- [Detailed conversion procedure](#detailed-conversion-procedure)
-	- [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
-	- [Related Projects](#related-projects)
+  - [Table of Contents](#table-of-contents)
+  - [Summary](#summary)
+  - [Usage](#usage)
+  - [Training detail from article](#training-detail-from-article)
+  - [Detailed conversion procedure](#detailed-conversion-procedure)
+  - [Progressive train test on cifar10](#progressive-train-test-on-cifar10)
+  - [Related Projects](#related-projects)
 
 <!-- /TOC -->
 ***
@@ -20,7 +20,7 @@
   - `h5` model weights converted from official publication.
   - `effv2-t-imagenet.h5` model weights converted from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021). which claimed both faster and better accuracy than `b3`. Please notice that `PyTorch` using different `bn_epsilon` and `padding` strategy, so this converted output is a little different from `PyTorch` version.
 
-  | Model       | Params | Top1 acc | ImageNet21K | Imagenet21k-ft1k | Imagenet |
+  | V2 Model    | Params | Top1 acc | ImageNet21K | Imagenet21k-ft1k | Imagenet |
   | ----------- | ------ | -------- | ----------- | ---------------- | -------- |
   | EffNetV2-B0 | 7.1M  | 78.7% | [effv2-b0-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-b0-21k.h5)|[effv2-b0-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-b0-21k-ft1k.h5)|[effv2-b0-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-b0-imagenet.h5)|
   | EffNetV2-B1 | 8.1M  | 79.8% | [effv2-b1-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-b1-21k.h5)|[effv2-b1-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-b1-21k-ft1k.h5)|[effv2-b1-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-b1-imagenet.h5)|
@@ -31,6 +31,20 @@
   | EffNetV2M   | 54.1M | 86.2% | [effv2-m-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-m-21k.h5) |[effv2-m-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-m-21k-ft1k.h5)|[effv2-m-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-m-imagenet.h5)|
   | EffNetV2L   | 119.5M| 86.9% | [effv2-l-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-l-21k.h5) |[effv2-l-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-l-21k-ft1k.h5)|[effv2-l-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-l-imagenet.h5)|
   | EffNetV2XL  | 206.8M| 87.2% | [effv2-xl-21k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-xl-21k.h5)|[effv2-xl-21k-ft1k.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-xl-21k-ft1k.h5)|[effv2-xl-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv2_pretrained/efficientnetv2-xl-imagenet.h5)|
+
+  - **EfficientNetV1 noisy_student models** from [Github tensorflow/tpu/efficientnet](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet). Paper [PDF 1911.04252 Self-training with Noisy Student improves ImageNet classification](https://arxiv.org/pdf/1911.04252.pdf). Parameter `include_preprocessing=False` is added, and the default `False` value makes expecting input value in range `[-1, 1]`, same with `EfficientNetV2`. Default `pretrained` is `noisy_student`.
+
+  | V1 Model       | Params  | Top1 Acc | noisy_student | Imagenet |
+  | -------------- | ------- | -------- | ------------- | -------- |
+  | EffNetV1-B0    | 5.3M    | 78.8     | [effv1-b0-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b0-noisy_student.h5) | [effv1-b0-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b0-imagenet.h5) |
+  | EffNetV1-B1    | 7.8M    | 81.5     | [effv1-b1-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b1-noisy_student.h5) | [effv1-b1-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b1-imagenet.h5) |
+  | EffNetV1-B2    | 9.1M    | 82.4     | [effv1-b2-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b2-noisy_student.h5) | [effv1-b2-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b2-imagenet.h5) |
+  | EffNetV1-B3    | 12.2M   | 84.1     | [effv1-b3-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b3-noisy_student.h5) | [effv1-b3-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b3-imagenet.h5) |
+  | EffNetV1-B4    | 19.3M   | 85.3     | [effv1-b4-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b4-noisy_student.h5) | [effv1-b4-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b4-imagenet.h5) |
+  | EffNetV1-B5    | 30.4M   | 86.1     | [effv1-b5-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b5-noisy_student.h5) | [effv1-b5-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b5-imagenet.h5) |
+  | EffNetV1-B6    | 43.0M   | 86.4     | [effv1-b6-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b6-noisy_student.h5) | [effv1-b6-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b6-imagenet.h5) |
+  | EffNetV1-B7    | 66.3M   | 86.9     | [effv1-b7-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b7-noisy_student.h5) | [effv1-b7-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b7-imagenet.h5) |
+  | EffNetV1-L2    | 480.3M  | 88.4     | [effv1-l2-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-l2-noisy_student.h5) | [effv1-l2-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-l2-imagenet.h5) |
 ## Usage
   - This repo can be installed as a pip package, or just `git clone` it.
     ```py
