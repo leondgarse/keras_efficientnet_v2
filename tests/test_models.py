@@ -9,6 +9,50 @@ sys.path.append(".")
 import keras_efficientnet_v2
 
 
+def test_model_predict_b0_imagenet():
+    """ Run a single forward pass with EfficientNetV2B0 on imagenet """
+    model = keras_efficientnet_v2.EfficientNetV2B0(pretrained="imagenet")
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.76896363) <= 1e-5
+
+
+def test_model_predict_b1_imagenet_preprocessing():
+    """ Run a single forward pass with EfficientNetV2B1 on imagenet """
+    model = keras_efficientnet_v2.EfficientNetV2B1(pretrained="imagenet", include_preprocessing=True)
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.7541733) <= 1e-5
+
+
+def test_model_predict_b2_imagenet21k_ft1k():
+    """ Run a single forward pass with EfficientNetV2B2 on imagenet21k-ft1k """
+    model = keras_efficientnet_v2.EfficientNetV2B2(pretrained="imagenet21k-ft1k")
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.58329606) <= 1e-5
+
+
+def test_model_predict_b3_imagenet():
+    """ Run a single forward pass with EfficientNetV2B3 on imagenet """
+    model = keras_efficientnet_v2.EfficientNetV2B3(pretrained="imagenet")
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.87623954) <= 1e-5
+
+
 def test_model_predict_t_imagenet():
     """ Run a single forward pass with EfficientNetV2T on imagenet """
     model = keras_efficientnet_v2.EfficientNetV2T(pretrained="imagenet")
@@ -20,17 +64,6 @@ def test_model_predict_t_imagenet():
     assert abs(out[2] - 0.9561707) <= 1e-5
 
 
-def test_model_predict_b3_imagenet21k_ft1k():
-    """ Run a single forward pass with EfficientNetV2B3 on imagenet21k-ft1k """
-    model = keras_efficientnet_v2.EfficientNetV2B3(pretrained="imagenet21k-ft1k")
-    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
-    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
-    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
-
-    assert out[1] == "Egyptian_cat"
-    assert abs(out[2] - 0.67183936) <= 1e-5
-
-
 def test_model_predict_s_imagenet21k():
     """ Run a single forward pass with EfficientNetV2S on imagenet21k """
     model = keras_efficientnet_v2.EfficientNetV2S(num_classes=21843, pretrained="imagenet21k")
@@ -39,6 +72,28 @@ def test_model_predict_s_imagenet21k():
 
     assert pred.argmax() == 2389
     assert abs(pred.max() - 0.15546332) <= 1e-5
+
+
+def test_model_predict_v1_b0_imagenet():
+    """ Run a single forward pass with EfficientNetV1B2 on imagenet """
+    model = keras_efficientnet_v2.EfficientNetV1B0(pretrained="imagenet")
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.64605427) <= 1e-5
+
+
+def test_model_predict_v1_b1_noisy_student():
+    """ Run a single forward pass with EfficientNetV1B2 on imagenet """
+    model = keras_efficientnet_v2.EfficientNetV1B1(pretrained="noisy_student")
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.8223327) <= 1e-5
 
 
 def test_model_predict_v1_b2_imagenet():
@@ -52,17 +107,6 @@ def test_model_predict_v1_b2_imagenet():
     assert abs(out[2] - 0.5294576) <= 1e-5
 
 
-def test_model_predict_v1_b4_noisy_student():
-    """ Run a single forward pass with EfficientNetV1B6 on noisy_student """
-    model = keras_efficientnet_v2.EfficientNetV1B4(pretrained="noisy_student")
-    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
-    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
-    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
-
-    assert out[1] == "Egyptian_cat"
-    assert abs(out[2] - 0.67979187) <= 1e-5
-
-
 def test_model_predict_v1_b3_noisy_student_preprocessing():
     """ Run a single forward pass with EfficientNetV1B6 on noisy_student """
     model = keras_efficientnet_v2.EfficientNetV1B3(pretrained="noisy_student", include_preprocessing=True)
@@ -72,3 +116,14 @@ def test_model_predict_v1_b3_noisy_student_preprocessing():
 
     assert out[1] == "Egyptian_cat"
     assert abs(out[2] - 0.8620049) <= 1e-5
+
+
+def test_model_predict_v1_b4_noisy_student():
+    """ Run a single forward pass with EfficientNetV1B6 on noisy_student """
+    model = keras_efficientnet_v2.EfficientNetV1B4(pretrained="noisy_student")
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3])  # Chelsea the cat
+    pred = model(tf.expand_dims(imm / 128 - 1, 0)).numpy()
+    out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
+
+    assert out[1] == "Egyptian_cat"
+    assert abs(out[2] - 0.67979187) <= 1e-5
