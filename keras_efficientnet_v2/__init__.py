@@ -1,3 +1,4 @@
+from .version import __version__
 from keras_efficientnet_v2.efficientnet_v2 import (
     EfficientNetV2,
     EfficientNetV2B0,
