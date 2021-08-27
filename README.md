@@ -44,7 +44,7 @@
   | EffNetV1-B5    | 30.4M   | 86.1     | [effv1-b5-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b5-noisy_student.h5) | [effv1-b5-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b5-imagenet.h5) |
   | EffNetV1-B6    | 43.0M   | 86.4     | [effv1-b6-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b6-noisy_student.h5) | [effv1-b6-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b6-imagenet.h5) |
   | EffNetV1-B7    | 66.3M   | 86.9     | [effv1-b7-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b7-noisy_student.h5) | [effv1-b7-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b7-imagenet.h5) |
-  | EffNetV1-L2    | 480.3M  | 88.4     | [effv1-l2-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-l2-noisy_student.h5) | [effv1-l2-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-l2-imagenet.h5) |
+  | EffNetV1-L2    | 480.3M  | 88.4     | [effv1-l2-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-l2-noisy_student.h5) |  |
 ## Usage
   - This repo can be installed as a pip package, or just `git clone` it.
     ```py
@@ -91,6 +91,17 @@
     # (1, 7, 7, 1280)
     print(model(np.ones([1, 512, 512, 3])).shape)
     # (1, 16, 16, 1280)
+    ```
+  - **`include_preprocessing`** set `True` will add pre-processing `Rescale + Normalization` after `Input`. Means using input value in range `[0, 255]`. Default value `False` means in range `[-1, 1]`. Works both for `EfficientNetV2` and `EfficientNetV1`.
+    ```py
+    import keras_efficientnet_v2
+    model = keras_efficientnet_v2.EfficientNetV1B4(pretrained="noisy_student", include_preprocessing=True)
+
+    from skimage.data import chelsea
+    imm = tf.image.resize(chelsea(), model.input_shape[1:3]) # Chelsea the cat
+    pred = model(tf.expand_dims(imm, 0)).numpy()  # value in range [0, 255]
+    print(keras.applications.imagenet_utils.decode_predictions(pred)[0])
+    # [('n02124075', 'Egyptian_cat', 0.68414235), ('n02123159', 'tiger_cat', 0.04486668), ...]
     ```
 ## Training detail from article
   - EfficientNetV2-S architecture
