@@ -332,11 +332,11 @@ def EfficientNetV2(
 def reload_model_weights(model, model_type, pretrained="imagenet"):
     pretrained_dd = {"imagenet": "imagenet", "imagenet21k": "21k", "imagenet21k-ft1k": "21k-ft1k", "noisy_student": "noisy_student"}
     if not pretrained in pretrained_dd:
-        print(">>>> No pretraind available, model will be randomly initialized")
+        print(">>>> No pretrained available, model will be randomly initialized")
         return
     pre_tt = pretrained_dd[pretrained]
     if model_type not in FILE_HASH_DICT or pre_tt not in FILE_HASH_DICT[model_type]:
-        print(">>>> No pretraind available, model will be randomly initialized")
+        print(">>>> No pretrained available, model will be randomly initialized")
         return
 
     if model_type.startswith("v1"):
@@ -353,7 +353,7 @@ def reload_model_weights(model, model_type, pretrained="imagenet"):
         print("[Error] will not load weights, url not found or download failed:", url)
         return
     else:
-        print(">>>> Load pretraind from:", pretrained_model)
+        print(">>>> Load pretrained from:", pretrained_model)
         model.load_weights(pretrained_model, by_name=True, skip_mismatch=True)
 
 
