@@ -285,8 +285,14 @@ def EfficientNetV2(
     inputs = Input(shape=input_shape)
     if include_preprocessing:
         channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-        nn = keras.layers.experimental.preprocessing.Rescaling(1.0 / 255.0)(inputs)
-        nn = keras.layers.experimental.preprocessing.Normalization(mean=[0.485, 0.456, 0.406], variance=[0.229, 0.224, 0.225], axis=channel_axis)(nn)
+        try:
+            Rescaling = keras.layers.Rescaling
+            Normalization = keras.layers.Normalization
+        except:
+            Rescaling = keras.layers.experimental.preprocessing.Rescaling
+            Normalization = keras.layers.experimental.preprocessing.Normalization
+        nn = Rescaling(1.0 / 255.0)(inputs)
+        nn = Normalization(mean=[0.485, 0.456, 0.406], variance=[0.229, 0.224, 0.225], axis=channel_axis)(nn)
     else:
         nn = inputs
     out_channel = _make_divisible(first_conv_filter, 8)
