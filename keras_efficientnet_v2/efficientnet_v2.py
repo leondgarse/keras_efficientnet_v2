@@ -5,8 +5,6 @@ EfficientNetV2: Smaller Models and Faster Training
 arXiv preprint arXiv:2104.00298.
 """
 import os
-import math
-import copy
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as K
@@ -31,29 +29,7 @@ BATCH_NORM_EPSILON = 0.001
 CONV_KERNEL_INITIALIZER = keras.initializers.VarianceScaling(scale=2.0, mode="fan_out", distribution="truncated_normal")
 # CONV_KERNEL_INITIALIZER = 'glorot_uniform'
 
-V1_BLOCK_CONFIGS = {
-    "v1-base": {  # width 1.0, depth 1.0
-        "first_conv_filter": 32,
-        "output_conv_filter": 1280,
-        "expands": [1, 6, 6, 6, 6, 6, 6],
-        "out_channels": [16, 24, 40, 80, 112, 192, 320],
-        "depthes": [1, 2, 2, 3, 3, 4, 1],
-        "strides": [1, 2, 2, 2, 1, 2, 1],
-        "use_ses": [1, 1, 1, 1, 1, 1, 1],
-        "kernel_sizes": [3, 3, 5, 3, 5, 5, 3],
-    },
-    "v1-b0": {"width": 1.0, "depth": 1.0},
-    "v1-b1": {"width": 1.0, "depth": 1.1},
-    "v1-b2": {"width": 1.1, "depth": 1.2},
-    "v1-b3": {"width": 1.2, "depth": 1.4},
-    "v1-b4": {"width": 1.4, "depth": 1.8},
-    "v1-b5": {"width": 1.6, "depth": 2.2},
-    "v1-b6": {"width": 1.8, "depth": 2.6},
-    "v1-b7": {"width": 2.0, "depth": 3.1},
-    "v1-l2": {"width": 4.3, "depth": 5.3},
-}
-
-V2_BLOCK_CONFIGS = {
+BLOCK_CONFIGS = {
     "b0": {  # width 1.0, depth 1.0
         "first_conv_filter": 32,
         "expands": [1, 4, 4, 4, 6, 6],
@@ -264,15 +240,10 @@ def EfficientNetV2(
     model_name="EfficientNetV2",
     kwargs=None,  # Not used, just recieving parameter
 ):
-    if model_type.startswith("v1"):
-        blocks_config = copy.deepcopy(V1_BLOCK_CONFIGS["v1-base"])
-        exp_config = V1_BLOCK_CONFIGS.get(model_type.lower(), V1_BLOCK_CONFIGS["v1-b0"])
-        blocks_config.update({"first_conv_filter": _make_divisible(exp_config["width"] * blocks_config["first_conv_filter"], divisor=8)})
-        blocks_config.update({"output_conv_filter": _make_divisible(exp_config["width"] * blocks_config["output_conv_filter"], divisor=8)})
-        blocks_config.update({"out_channels": [_make_divisible(ii * exp_config["width"], divisor=8) for ii in blocks_config["out_channels"]]})
-        blocks_config.update({"depthes": [int(math.ceil(ii * exp_config["depth"])) for ii in blocks_config["depthes"]]})
+    if isinstance(model_type, dict):
+        model_type, blocks_config = model_type.popitem()
     else:
-        blocks_config = V2_BLOCK_CONFIGS.get(model_type.lower(), V2_BLOCK_CONFIGS["s"])
+        blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
     expands = blocks_config["expands"]
     out_channels = blocks_config["out_channels"]
     depthes = blocks_config["depthes"]
@@ -391,43 +362,6 @@ def EfficientNetV2L(input_shape=(480, 480, 3), num_classes=1000, dropout=0.4, cl
 
 def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="xl", model_name="EfficientNetV2XL", **locals(), **kwargs)
-
-
-def EfficientNetV1B0(input_shape=(224, 224, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b0", model_name="EfficientNetV1B0", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B1(input_shape=(240, 240, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b1", model_name="EfficientNetV1B1", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B2(input_shape=(260, 260, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b2", model_name="EfficientNetV1B2", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b3", model_name="EfficientNetV1B3", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B4(input_shape=(380, 380, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b4", model_name="EfficientNetV1B4", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B5(input_shape=(456, 456, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b5", model_name="EfficientNetV1B5", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B6(input_shape=(528, 528, 3), num_classes=1000, dropout=0.5, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b6", model_name="EfficientNetV1B6", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1B7(input_shape=(600, 600, 3), num_classes=1000, dropout=0.5, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-b7", model_name="EfficientNetV1B7", drop_connect_rate=0.2, **locals(), **kwargs)
-
-
-def EfficientNetV1L2(input_shape=(800, 800, 3), num_classes=1000, dropout=0.5, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
-    return EfficientNetV2(model_type="v1-l2", model_name="EfficientNetV1L2", drop_connect_rate=0.2, **locals(), **kwargs)
-
 
 def get_actual_drop_connect_rates(model):
     return [ii.rate for ii in model.layers if isinstance(ii, keras.layers.Dropout)]
