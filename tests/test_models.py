@@ -74,6 +74,21 @@ def test_model_predict_s_imagenet21k():
     assert abs(pred.max() - 0.15546332) <= 1e-5
 
 
+def test_model_m_defination():
+    model = keras_efficientnet_v2.EfficientNetV2M(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 15, 15, 1280)
+
+
+def test_model_l_defination():
+    model = keras_efficientnet_v2.EfficientNetV2L(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 15, 15, 1280)
+
+
+def test_model_xl_defination():
+    model = keras_efficientnet_v2.EfficientNetV2XL(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 16, 16, 1280)
+
+
 def test_model_predict_v1_b0_imagenet():
     """ Run a single forward pass with EfficientNetV1B2 on imagenet """
     model = keras_efficientnet_v2.EfficientNetV1B0(pretrained="imagenet")
@@ -127,3 +142,23 @@ def test_model_predict_v1_b4_noisy_student():
 
     assert out[1] == "Egyptian_cat"
     assert abs(out[2] - 0.67979187) <= 1e-5
+
+
+def test_model_v1_b5_defination():
+    model = keras_efficientnet_v2.EfficientNetV1B5(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 15, 15, 2048)
+
+
+def test_model_v1_b6_defination():
+    model = keras_efficientnet_v2.EfficientNetV1B6(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 17, 17, 2304)
+
+
+def test_model_v1_b7_defination():
+    model = keras_efficientnet_v2.EfficientNetV1B7(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 19, 19, 2560)
+
+
+def test_model_v1_l2_defination():
+    model = keras_efficientnet_v2.EfficientNetV1L2(num_classes=0, pretrained=None)
+    assert model.output_shape == (None, 25, 25, 5504)
