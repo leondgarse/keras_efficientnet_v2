@@ -1,5 +1,5 @@
 """
-Creates a EfficientNetV2 Model as defined in:
+Creates a EfficientNetV1 Model as defined in:
 EfficientNetV1: Self-training with Noisy Student improves ImageNet classification
 arXiv preprint arXiv:1911.04252.
 """
@@ -28,6 +28,7 @@ BLOCK_CONFIGS = {
     "b7": {"width": 2.0, "depth": 3.1},
     "l2": {"width": 4.3, "depth": 5.3},
 }
+
 
 def EfficientNetV1(
     model_type,
@@ -97,4 +98,3 @@ def EfficientNetV1B7(input_shape=(600, 600, 3), num_classes=1000, dropout=0.5, c
 
 def EfficientNetV1L2(input_shape=(800, 800, 3), num_classes=1000, dropout=0.5, classifier_activation="softmax", pretrained="noisy_student", **kwargs):
     return EfficientNetV1(model_type="l2", model_name="EfficientNetV1L2", **locals(), **kwargs)
-

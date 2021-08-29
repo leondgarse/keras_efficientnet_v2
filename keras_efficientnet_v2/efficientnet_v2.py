@@ -240,7 +240,7 @@ def EfficientNetV2(
     model_name="EfficientNetV2",
     kwargs=None,  # Not used, just recieving parameter
 ):
-    if isinstance(model_type, dict):
+    if isinstance(model_type, dict):  # For EfficientNetV1 configures
         model_type, blocks_config = model_type.popitem()
     else:
         blocks_config = BLOCK_CONFIGS.get(model_type.lower(), BLOCK_CONFIGS["s"])
@@ -362,6 +362,7 @@ def EfficientNetV2L(input_shape=(480, 480, 3), num_classes=1000, dropout=0.4, cl
 
 def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet", **kwargs):
     return EfficientNetV2(model_type="xl", model_name="EfficientNetV2XL", **locals(), **kwargs)
+
 
 def get_actual_drop_connect_rates(model):
     return [ii.rate for ii in model.layers if isinstance(ii, keras.layers.Dropout)]
