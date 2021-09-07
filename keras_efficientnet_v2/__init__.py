@@ -73,23 +73,47 @@ Model architectures:
   | EfficientNetV2M   | 54.1M  | 86.2%       |
   | EfficientNetV2L   | 119.5M | 86.9%       |
   | EfficientNetV2XL  | 206.8M | 87.2%       |
+
+Training configures: `Eval size` is used as the default model `input_shape` for each model type.
+  | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
+  | ------- | ---------- | --------- | ------- | ------- | ----- |
+  | EffV2B0 | 192        | 224       | 0.2     | 0       | 0     |
+  | EffV2B1 | 192        | 240       | 0.2     | 0       | 0     |
+  | EffV2B2 | 208        | 260       | 0.3     | 0       | 0     |
+  | EffV2B3 | 240        | 300       | 0.3     | 0       | 0     |
+  | EffV2T  | 224        | 320       | 0.2     | 0       | 0     |
+  | EffV2S  | 300        | 384       | 0.2     | 10      | 0     |
+  | EffV2M  | 384        | 480       | 0.3     | 15      | 0.2   |
+  | EffV2L  | 384        | 480       | 0.4     | 20      | 0.5   |
+  | EffV2XL | 384        | 512       | 0.4     | 20      | 0.5   |
 """
 
-EfficientNetV2B0.__doc__ = __v2_head_doc__ + """
+__v2_default_doc__ = __v2_head_doc__ + """
 Args:
-""" + __tail_doc__.format(pretrained=[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"])
+""" + __tail_doc__.format(pretrained=[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]) + """
+Training configures: `Eval size` is used as the default model `input_shape`.
+  | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
+  | ------- | ---------- | --------- | ------- | ------- | ----- |
+  {train_config}
+"""
 
-EfficientNetV2B1.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2B2.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2B3.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2S.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2M.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2L.__doc__ = EfficientNetV2B0.__doc__
-EfficientNetV2XL.__doc__ = EfficientNetV2B0.__doc__
+EfficientNetV2B0.__doc__ = __v2_default_doc__.format(train_config="| EffV2B0 | 192        | 224       | 0.2     | 0       | 0     |")
+EfficientNetV2B1.__doc__ = __v2_default_doc__.format(train_config="| EffV2B1 | 192        | 240       | 0.2     | 0       | 0     |")
+EfficientNetV2B2.__doc__ = __v2_default_doc__.format(train_config="| EffV2B2 | 208        | 260       | 0.3     | 0       | 0     |")
+EfficientNetV2B3.__doc__ = __v2_default_doc__.format(train_config="| EffV2B3 | 240        | 300       | 0.3     | 0       | 0     |")
+EfficientNetV2S.__doc__ = __v2_default_doc__.format(train_config="| EffV2S  | 300        | 384       | 0.2     | 10      | 0     |")
+EfficientNetV2M.__doc__ = __v2_default_doc__.format(train_config="| EffV2M  | 384        | 480       | 0.3     | 15      | 0.2   |")
+EfficientNetV2L.__doc__ = __v2_default_doc__.format(train_config="| EffV2L  | 384        | 480       | 0.4     | 20      | 0.5   |")
+EfficientNetV2XL.__doc__ = __v2_default_doc__.format(train_config="| EffV2XL | 384        | 512       | 0.4     | 20      | 0.5   |")
 EfficientNetV2T.__doc__ = __v2_head_doc__ + """Architecture and weights from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021).
 
 Args:
-""" + __tail_doc__.format(pretrained=[None, "imagenet"])
+""" + __tail_doc__.format(pretrained=[None, "imagenet"]) + """
+Training configures: `Eval size` is used as the default model `input_shape`.
+  | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
+  | ------- | ---------- | --------- | ------- | ------- | ----- |
+  | EffV2T  | 224        | 320       | 0.2     | 0       | 0     |
+"""
 
 __v1_head_doc__ = """
 Github source [leondgarse/keras_efficientnet_v2](https://github.com/leondgarse/keras_efficientnet_v2).
@@ -114,17 +138,36 @@ Model architectures:
   | EfficientNetV1B6  | 43.0M   | 86.4        |
   | EfficientNetV1B7  | 66.3M   | 86.9        |
   | EfficientNetV1L2  | 480.3M  | 88.4        |
+
+Training configures:
+  | Model            | Input resolution | Dropout | Drop connect rate |
+  | ---------------- | ---------------- | ------- | ----------------- |
+  | EfficientNetV1B0 | 224              | 0.2     | 0.2               |
+  | EfficientNetV1B1 | 240              | 0.2     | 0.2               |
+  | EfficientNetV1B2 | 260              | 0.3     | 0.2               |
+  | EfficientNetV1B3 | 300              | 0.3     | 0.2               |
+  | EfficientNetV1B4 | 380              | 0.4     | 0.2               |
+  | EfficientNetV1B5 | 456              | 0.4     | 0.2               |
+  | EfficientNetV1B6 | 528              | 0.5     | 0.2               |
+  | EfficientNetV1B7 | 600              | 0.5     | 0.2               |
+  | EfficientNetV1L2 | 800              | 0.5     | 0.2               |
 """
 
-EfficientNetV1B0.__doc__ = __v1_head_doc__ + """
+__v1_default_doc__ = __v1_head_doc__ + """
 Args:
-""" + __tail_doc__.format(pretrained=[None, "imagenet", "noisy_student"])
+""" + __tail_doc__.format(pretrained=[None, "imagenet", "noisy_student"]) + """
+Training configures: `Eval size` is used as the default model `input_shape`.
+  | Model            | Input resolution | Dropout | Drop connect rate |
+  | ---------------- | ---------------- | ------- | ----------------- |
+  {train_config}
+"""
 
-EfficientNetV1B1.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1B2.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1B3.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1B4.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1B5.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1B6.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1B7.__doc__ = EfficientNetV1B0.__doc__
-EfficientNetV1L2.__doc__ = EfficientNetV1B0.__doc__
+EfficientNetV1B0.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B0 | 224              | 0.2     | 0.2               |")
+EfficientNetV1B1.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B1 | 240              | 0.2     | 0.2               |")
+EfficientNetV1B2.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B2 | 260              | 0.3     | 0.2               |")
+EfficientNetV1B3.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B3 | 300              | 0.3     | 0.2               |")
+EfficientNetV1B4.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B4 | 380              | 0.4     | 0.2               |")
+EfficientNetV1B5.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B5 | 456              | 0.4     | 0.2               |")
+EfficientNetV1B6.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B6 | 528              | 0.5     | 0.2               |")
+EfficientNetV1B7.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1B7 | 600              | 0.5     | 0.2               |")
+EfficientNetV1L2.__doc__ = __v1_default_doc__.format(train_config="| EfficientNetV1L2 | 800              | 0.5     | 0.2               |")
