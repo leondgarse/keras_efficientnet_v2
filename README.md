@@ -105,6 +105,7 @@
     ```
 ## Training detail from article
   - **Training configures**, `Eval size` is used as the default `input_shape` for each model type.
+
     | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
     | ------- | ---------- | --------- | ------- | ------- | ----- |
     | EffV2B0 | 192        | 224       | 0.2     | 0       | 0     |
