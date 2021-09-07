@@ -104,6 +104,18 @@
     # [('n02124075', 'Egyptian_cat', 0.68414235), ('n02123159', 'tiger_cat', 0.04486668), ...]
     ```
 ## Training detail from article
+  - **Training configures**, `Eval size` is used as the default model `input_shape` for each model type.
+    | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
+    | ------- | ---------- | --------- | ------- | ------- | ----- |
+    | EffV2B0 | 192        | 224       | 0.2     | 0       | 0     |
+    | EffV2B1 | 192        | 240       | 0.2     | 0       | 0     |
+    | EffV2B2 | 208        | 260       | 0.3     | 0       | 0     |
+    | EffV2B3 | 240        | 300       | 0.3     | 0       | 0     |
+    | EffV2S  | 300        | 384       | 0.2     | 10      | 0     |
+    | EffV2M  | 384        | 480       | 0.3     | 15      | 0.2   |
+    | EffV2L  | 384        | 480       | 0.4     | 20      | 0.5   |
+    | EffV2XL | 384        | 512       | 0.4     | 20      | 0.5   |
+
   - EfficientNetV2-S architecture
 
     | Stage | Operator               | Stride | #Channels | #Layers |
