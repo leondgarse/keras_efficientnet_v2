@@ -104,7 +104,7 @@
     # [('n02124075', 'Egyptian_cat', 0.68414235), ('n02123159', 'tiger_cat', 0.04486668), ...]
     ```
 ## Training detail from article
-  - **Training configures**, `Eval size` is used as the default model `input_shape` for each model type.
+  - **Training configures**, `Eval size` is used as the default `input_shape` for each model type.
     | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
     | ------- | ---------- | --------- | ------- | ------- | ----- |
     | EffV2B0 | 192        | 224       | 0.2     | 0       | 0     |
