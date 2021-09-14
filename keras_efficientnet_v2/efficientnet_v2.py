@@ -360,7 +360,7 @@ def EfficientNetV2L(input_shape=(480, 480, 3), num_classes=1000, dropout=0.4, cl
     return EfficientNetV2(model_type="l", model_name="EfficientNetV2L", **locals(), **kwargs)
 
 
-def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet", **kwargs):
+def EfficientNetV2XL(input_shape=(512, 512, 3), num_classes=1000, dropout=0.4, classifier_activation="softmax", pretrained="imagenet21k-ft1k", **kwargs):
     return EfficientNetV2(model_type="xl", model_name="EfficientNetV2XL", **locals(), **kwargs)
 
 

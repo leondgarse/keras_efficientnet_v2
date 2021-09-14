@@ -58,7 +58,7 @@ Returns:
 
 EfficientNetV2.__doc__ = __v2_head_doc__ + """
 Args:
-  model_type: is the pre-defined model, value in ["t", "s", "m", "l", "b0", "b1", "b2", "b3"].
+  model_type: is the pre-defined model, value in ["t", "s", "m", "l", "xl", "b0", "b1", "b2", "b3"].
   model_name: string, model name.
 """ + __tail_doc__.format(pretrained=[None, "imagenet", "imagenet21k", "imagenet21k-ft1k"]) + """
 Model architectures:
@@ -104,7 +104,14 @@ EfficientNetV2B3.__doc__ = __v2_default_doc__.format(train_config="| EffV2B3 | 2
 EfficientNetV2S.__doc__ = __v2_default_doc__.format(train_config="| EffV2S  | 300        | 384       | 0.2     | 10      | 0     |")
 EfficientNetV2M.__doc__ = __v2_default_doc__.format(train_config="| EffV2M  | 384        | 480       | 0.3     | 15      | 0.2   |")
 EfficientNetV2L.__doc__ = __v2_default_doc__.format(train_config="| EffV2L  | 384        | 480       | 0.4     | 20      | 0.5   |")
-EfficientNetV2XL.__doc__ = __v2_default_doc__.format(train_config="| EffV2XL | 384        | 512       | 0.4     | 20      | 0.5   |")
+EfficientNetV2XL.__doc__ = __v2_head_doc__ + """
+Args:
+""" + __tail_doc__.format(pretrained=[None, "imagenet21k", "imagenet21k-ft1k"]) + """
+Training configures: `Eval size` is used as the default model `input_shape`.
+  | Model   | Train size | Eval size | Dropout | Randaug | Mixup |
+  | ------- | ---------- | --------- | ------- | ------- | ----- |
+  | EffV2XL | 384        | 512       | 0.4     | 20      | 0.5   |
+"""
 EfficientNetV2T.__doc__ = __v2_head_doc__ + """Architecture and weights from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021).
 
 Args:
