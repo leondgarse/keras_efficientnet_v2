@@ -18,7 +18,7 @@
 ## Summary
   - My own keras implementation of [Official efficientnetv2](https://github.com/google/automl/tree/master/efficientnetv2). Article [arXiv 2104.00298 EfficientNetV2: Smaller Models and Faster Training](https://arxiv.org/abs/2104.00298) by Mingxing Tan, Quoc V. Le.
   - `h5` model weights converted from official publication.
-  - `effv2-t-imagenet.h5` model weights converted from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021). which claimed both faster and better accuracy than `b3`. Please notice that `PyTorch` using different `bn_epsilon` and `padding` strategy, so this converted output is a little different from `PyTorch` version.
+  - `effv2-t-imagenet.h5` model weights converted from [Github rwightman/pytorch-image-models](https://github.com/rwightman/pytorch-image-models#july-5-9-2021). which claimed both faster and better accuracy than `b3`. Please notice that `PyTorch` using different `bn_epsilon` and `padding` strategy.
 
   | V2 Model    | Params | Top1 | Input | ImageNet21K | Imagenet21k-ft1k | Imagenet |
   | ----------- | ------ | ---- | ----- | ----------- | ---------------- | -------- |
@@ -45,6 +45,27 @@
   | EffV1B6    | 43.0M   | 86.4 | 528 | [v1-b6-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b6-noisy_student.h5) | [v1-b6-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b6-imagenet.h5) |
   | EffV1B7    | 66.3M   | 86.9 | 600 | [v1-b7-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b7-noisy_student.h5) | [v1-b7-imagenet.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-b7-imagenet.h5) |
   | EffV1L2    | 480.3M  | 88.4 | 800 | [v1-l2-noisy_student.h5](https://github.com/leondgarse/keras_efficientnet_v2/releases/download/effnetv1_pretrained/efficientnetv1-l2-noisy_student.h5) |  |
+
+  - **Self tested imagenet accuracy**
+    - `rescale_mode` `torch` means `(image - [0.485, 0.456, 0.406]) / [[0.229, 0.224, 0.225]]`, `tf` means `(image - 0.5) / 0.5`
+    - All `resize_method` is `bicubic`.
+    - Some testing detail is not clear, so not exactly matching official reported results.
+    - Testing Detail is [EfficientNetV2 self tested imagenet accuracy](https://github.com/leondgarse/keras_efficientnet_v2/discussions/16).
+
+  | model        | input | rescale_mode | central_crop | top 1   | top 5   | Reported top1     |
+  | ------------ | ----- | ------------ | ------------ | ------- | ------- | ----------------- |
+  | EffV2B0      | 224   | torch        | 0.875        | 0.78748 | 0.94386 | 0.787             |
+  | EffV2B1      | 240   | torch        | 0.95         | 0.7987  | 0.94936 | 0.798             |
+  | EffV2B2      | 260   | torch        | 0.95         | 0.80642 | 0.95262 | 0.805             |
+  | EffV2B3      | 300   | torch        | 0.95         | 0.82098 | 0.95896 | 0.821             |
+  | EffV2T       | 320   | torch        | 0.99         | 0.82506 | 0.96228 | 0.823 (input 288) |
+  | EffV2S       | 384   | tf           | 0.99         | 0.8386  | 0.967   | 0.839             |
+  | EffV2M       | 480   | tf           | 0.99         | 0.8509  | 0.973   | 0.852             |
+  | EffV2L       | 480   | tf           | 0.99         | 0.855   | 0.97324 | 0.857             |
+  | EffV2S ft1k  | 384   | tf           | 0.99         | 0.84328 | 0.97254 | 0.849             |
+  | EffV2M ft1k  | 480   | tf           | 0.99         | 0.85606 | 0.9775  | 0.862             |
+  | EffV2L ft1k  | 480   | tf           | 0.99         | 0.86294 | 0.9799  | 0.869             |
+  | EffV2XL ft1k | 512   | tf           | 0.99         | 0.86532 | 0.97866 | 0.872             |
 ## Usage
   - This repo can be installed as a pip package, or just `git clone` it.
     ```py

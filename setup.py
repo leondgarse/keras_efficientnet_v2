@@ -8,9 +8,7 @@ here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
-    long_description = f.read().replace(
-        "cifar10_progressive_train.svg", "https://github.com/leondgarse/keras_efficientnet_v2/blob/main/cifar10_progressive_train.svg"
-    )
+    long_description = f.read()
 
 exec(open("keras_efficientnet_v2/version.py").read())
 setup(
@@ -28,7 +26,7 @@ setup(
         #   4 - Beta
         #   5 - Production/Stable
         "Development Status :: 4 - Beta",
-        "Intended Audience :: Education",
+        "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3.6",
