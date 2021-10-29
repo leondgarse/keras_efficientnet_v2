@@ -61,7 +61,7 @@ def test_model_predict_t_imagenet():
     out = keras.applications.imagenet_utils.decode_predictions(pred)[0][0]
 
     assert out[1] == "Egyptian_cat"
-    assert abs(out[2] - 0.9561707) <= 1e-5
+    assert abs(out[2] - 0.8502904) <= 1e-5
 
 
 def test_model_predict_s_imagenet21k():
