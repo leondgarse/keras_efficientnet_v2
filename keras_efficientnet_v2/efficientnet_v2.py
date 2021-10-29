@@ -26,6 +26,7 @@ from tensorflow.keras.layers import (
 
 BATCH_NORM_DECAY = 0.9
 BATCH_NORM_EPSILON = 0.001
+TORCH_BATCH_NORM_EPSILON = 1e-5
 CONV_KERNEL_INITIALIZER = keras.initializers.VarianceScaling(scale=2.0, mode="fan_out", distribution="truncated_normal")
 # CONV_KERNEL_INITIALIZER = 'glorot_uniform'
 
@@ -82,6 +83,15 @@ BLOCK_CONFIGS = {
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
     },
+    "early": {  # S model discribed in paper early version https://arxiv.org/pdf/2104.00298v2.pdf
+        "first_conv_filter": 24,
+        "output_conv_filter": 1792,
+        "expands": [1, 4, 4, 4, 6, 6],
+        "out_channels": [24, 48, 64, 128, 160, 272],
+        "depthes": [2, 4, 4, 6, 9, 15],
+        "strides": [1, 2, 2, 2, 1, 2],
+        "use_ses": [0, 0, 0, 1, 1, 1],
+    },
     "m": {  # width 1.6, depth 2.2
         "first_conv_filter": 24,
         "output_conv_filter": 1280,
@@ -119,7 +129,7 @@ FILE_HASH_DICT = {
     "l": {"21k-ft1k": "30327edcf1390d10e9a0de42a2d731e3", "21k": "7970f913eec1b4918e007c8580726412", "imagenet": "2b65f5789f4d2f1bf66ecd6d9c5c2d46"},
     "m": {"21k-ft1k": "0c236c3020e3857de1e5f2939abd0cc6", "21k": "3923c286366b2a5137f39d1e5b14e202", "imagenet": "ac3fd0ff91b35d18d1df8f1895efe1d5"},
     "s": {"21k-ft1k": "93046a0d601da46bfce9d4ca14224c83", "21k": "10b05d878b64f796ab984a5316a4a1c3", "imagenet": "3b91df2c50c7a56071cca428d53b8c0d"},
-    "t": {"imagenet": "46632458117102758518158bf35444d7"},
+    "t": {"imagenet": "4a0ff9cb396665734d7ca590fa29681b"},
     "xl": {"21k-ft1k": "9aaa2bd3c9495b23357bc6593eee5bce", "21k": "c97de2770f55701f788644336181e8ee"},
     "v1-b0": {"noisy_student": "d125a518737c601f8595937219243432", "imagenet": "cc7d08887de9df8082da44ce40761986"},
     "v1-b1": {"noisy_student": "8f44bff58fc5ef99baa3f163b3f5c5e8", "imagenet": "a967f7be55a0125c898d650502c0cfd0"},
@@ -149,19 +159,24 @@ def _make_divisible(v, divisor=4, min_value=None):
     return new_v
 
 
-def conv2d_no_bias(inputs, filters, kernel_size, strides=1, padding="VALID", name=""):
+def conv2d_no_bias(inputs, filters, kernel_size, strides=1, padding="VALID", use_torch_padding=False, name=""):
+    pad = max(kernel_size) // 2 if isinstance(kernel_size, (list, tuple)) else kernel_size // 2
+    if use_torch_padding and padding.upper() == "SAME" and pad != 0:
+        inputs = keras.layers.ZeroPadding2D(padding=pad, name=name and name + "pad")(inputs)
+        padding = "VALID"
+
     return Conv2D(filters, kernel_size, strides=strides, padding=padding, use_bias=False, kernel_initializer=CONV_KERNEL_INITIALIZER, name=name + "conv")(
         inputs
     )
 
 
-def batchnorm_with_activation(inputs, activation="swish", name=""):
+def batchnorm_with_activation(inputs, activation="swish", use_torch_eps=False, name=""):
     """Performs a batch normalization followed by an activation. """
     bn_axis = 1 if K.image_data_format() == "channels_first" else -1
     nn = BatchNormalization(
         axis=bn_axis,
         momentum=BATCH_NORM_DECAY,
-        epsilon=BATCH_NORM_EPSILON,
+        epsilon=TORCH_BATCH_NORM_EPSILON if use_torch_eps else BATCH_NORM_EPSILON,
         name=name + "bn",
     )(inputs)
     if activation:
@@ -188,36 +203,38 @@ def se_module(inputs, se_ratio=4, name=""):
     return Multiply()([inputs, se])
 
 
-def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, kernel_size=3, drop_rate=0, use_se=0, is_fused=False, name=""):
+def MBConv(inputs, output_channel, stride, expand_ratio, shortcut, kernel_size=3, drop_rate=0, use_se=0, is_fused=False, is_torch_mode=False, name=""):
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     input_channel = inputs.shape[channel_axis]
 
     if is_fused and expand_ratio != 1:
-        nn = conv2d_no_bias(inputs, input_channel * expand_ratio, (3, 3), strides=stride, padding="same", name=name + "sortcut_")
-        nn = batchnorm_with_activation(nn, name=name + "sortcut_")
+        nn = conv2d_no_bias(inputs, input_channel * expand_ratio, (3, 3), stride, padding="same", use_torch_padding=is_torch_mode, name=name + "sortcut_")
+        nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, name=name + "sortcut_")
     elif expand_ratio != 1:
-        nn = conv2d_no_bias(inputs, input_channel * expand_ratio, (1, 1), strides=(1, 1), padding="same", name=name + "sortcut_")
-        nn = batchnorm_with_activation(nn, name=name + "sortcut_")
+        nn = conv2d_no_bias(inputs, input_channel * expand_ratio, (1, 1), strides=(1, 1), padding="valid", name=name + "sortcut_")
+        nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, name=name + "sortcut_")
     else:
         nn = inputs
 
     if not is_fused:
-        # nn = keras.layers.ZeroPadding2D(padding=1, name=name + "pad")(nn)
-        nn = DepthwiseConv2D(kernel_size, padding="same", strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw_")(
-            nn
-        )
-        nn = batchnorm_with_activation(nn, name=name + "MB_dw_")
+        if is_torch_mode and kernel_size // 2 > 0:
+            nn = keras.layers.ZeroPadding2D(padding=kernel_size // 2, name=name + "pad")(nn)
+            pad = "VALID"
+        else:
+            pad = "SAME"
+        nn = DepthwiseConv2D(kernel_size, padding=pad, strides=stride, use_bias=False, depthwise_initializer=CONV_KERNEL_INITIALIZER, name=name + "MB_dw_")(nn)
+        nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, name=name + "MB_dw_")
 
     if use_se:
         nn = se_module(nn, se_ratio=4 * expand_ratio, name=name + "se_")
 
     # pw-linear
     if is_fused and expand_ratio == 1:
-        nn = conv2d_no_bias(nn, output_channel, (3, 3), strides=stride, padding="same", name=name + "fu_")
-        nn = batchnorm_with_activation(nn, name=name + "fu_")
+        nn = conv2d_no_bias(nn, output_channel, (3, 3), strides=stride, padding="same", use_torch_padding=is_torch_mode, name=name + "fu_")
+        nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, name=name + "fu_")
     else:
-        nn = conv2d_no_bias(nn, output_channel, (1, 1), strides=(1, 1), padding="same", name=name + "MB_pw_")
-        nn = batchnorm_with_activation(nn, activation=None, name=name + "MB_pw_")
+        nn = conv2d_no_bias(nn, output_channel, (1, 1), strides=(1, 1), padding="valid", name=name + "MB_pw_")
+        nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, activation=None, name=name + "MB_pw_")
 
     if shortcut:
         if drop_rate > 0:
@@ -233,6 +250,7 @@ def EfficientNetV2(
     num_classes=1000,
     dropout=0.2,
     first_strides=2,
+    is_torch_mode=False,
     drop_connect_rate=0,
     classifier_activation="softmax",
     include_preprocessing=False,
@@ -267,8 +285,8 @@ def EfficientNetV2(
     else:
         nn = inputs
     out_channel = _make_divisible(first_conv_filter, 8)
-    nn = conv2d_no_bias(nn, out_channel, (3, 3), strides=first_strides, padding="same", name="stem_")
-    nn = batchnorm_with_activation(nn, name="stem_")
+    nn = conv2d_no_bias(nn, out_channel, (3, 3), strides=first_strides, padding="same", use_torch_padding=is_torch_mode, name="stem_")
+    nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, name="stem_")
 
     pre_out = out_channel
     global_block_id = 0
@@ -281,13 +299,13 @@ def EfficientNetV2(
             shortcut = True if out == pre_out and stride == 1 else False
             name = "stack_{}_block{}_".format(id, block_id)
             block_drop_rate = drop_connect_rate * global_block_id / total_blocks
-            nn = MBConv(nn, out, stride, expand, shortcut, kernel_size, block_drop_rate, se, is_fused, name=name)
+            nn = MBConv(nn, out, stride, expand, shortcut, kernel_size, block_drop_rate, se, is_fused, is_torch_mode, name=name)
             pre_out = out
             global_block_id += 1
 
     output_conv_filter = _make_divisible(output_conv_filter, 8)
     nn = conv2d_no_bias(nn, output_conv_filter, (1, 1), strides=(1, 1), padding="valid", name="post_")
-    nn = batchnorm_with_activation(nn, name="post_")
+    nn = batchnorm_with_activation(nn, use_torch_eps=is_torch_mode, name="post_")
 
     if num_classes > 0:
         nn = GlobalAveragePooling2D(name="avg_pool")(nn)
@@ -345,6 +363,7 @@ def EfficientNetV2B3(input_shape=(300, 300, 3), num_classes=1000, dropout=0.3, c
 
 
 def EfficientNetV2T(input_shape=(320, 320, 3), num_classes=1000, dropout=0.2, classifier_activation="softmax", pretrained="imagenet", **kwargs):
+    is_torch_mode = True
     return EfficientNetV2(model_type="t", model_name="EfficientNetV2T", **locals(), **kwargs)
 
 
