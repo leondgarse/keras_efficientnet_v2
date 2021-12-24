@@ -1,5 +1,7 @@
 # ___Keras EfficientNetV2___
 ***
+- **As `EfficientNetV2` is included in `keras.application` now, merged this project into [Github leondgarse/keras_cv_attention_models/efficientnet](https://github.com/leondgarse/keras_cv_attention_models/tree/main/keras_cv_attention_models/efficientnet). Package `keras-efficientnet-v2` moved into `stable` status**.
+
 ## Table of Contents
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
