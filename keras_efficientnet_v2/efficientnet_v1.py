@@ -27,6 +27,7 @@ BLOCK_CONFIGS = {
     "b6": {"width": 1.8, "depth": 2.6},
     "b7": {"width": 2.0, "depth": 3.1},
     "l2": {"width": 4.3, "depth": 5.3},
+    "rescale_mode": "torch",
 }
 
 

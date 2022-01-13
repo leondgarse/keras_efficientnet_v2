@@ -38,6 +38,7 @@ BLOCK_CONFIGS = {
         "depthes": [1, 2, 2, 3, 5, 8],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "torch",
     },
     "b1": {  # width 1.0, depth 1.1
         "first_conv_filter": 32,
@@ -46,6 +47,7 @@ BLOCK_CONFIGS = {
         "depthes": [2, 3, 3, 4, 6, 9],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "torch",
     },
     "b2": {  # width 1.1, depth 1.2
         "first_conv_filter": 32,
@@ -55,6 +57,7 @@ BLOCK_CONFIGS = {
         "depthes": [2, 3, 3, 4, 6, 10],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "torch",
     },
     "b3": {  # width 1.2, depth 1.4
         "first_conv_filter": 40,
@@ -64,6 +67,7 @@ BLOCK_CONFIGS = {
         "depthes": [2, 3, 3, 5, 7, 12],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "torch",
     },
     "t": {  # width 1.4 * 0.8, depth 1.8 * 0.9, from timm
         "first_conv_filter": 24,
@@ -73,6 +77,7 @@ BLOCK_CONFIGS = {
         "depthes": [2, 4, 4, 6, 9, 14],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "torch",
     },
     "s": {  # width 1.4, depth 1.8
         "first_conv_filter": 24,
@@ -82,6 +87,7 @@ BLOCK_CONFIGS = {
         "depthes": [2, 4, 4, 6, 9, 15],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "tf",
     },
     "early": {  # S model discribed in paper early version https://arxiv.org/pdf/2104.00298v2.pdf
         "first_conv_filter": 24,
@@ -91,6 +97,7 @@ BLOCK_CONFIGS = {
         "depthes": [2, 4, 4, 6, 9, 15],
         "strides": [1, 2, 2, 2, 1, 2],
         "use_ses": [0, 0, 0, 1, 1, 1],
+        "rescale_mode": "tf",
     },
     "m": {  # width 1.6, depth 2.2
         "first_conv_filter": 24,
@@ -100,6 +107,7 @@ BLOCK_CONFIGS = {
         "depthes": [3, 5, 5, 7, 14, 18, 5],
         "strides": [1, 2, 2, 2, 1, 2, 1],
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
+        "rescale_mode": "tf",
     },
     "l": {  # width 2.0, depth 3.1
         "first_conv_filter": 32,
@@ -109,6 +117,7 @@ BLOCK_CONFIGS = {
         "depthes": [4, 7, 7, 10, 19, 25, 7],
         "strides": [1, 2, 2, 2, 1, 2, 1],
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
+        "rescale_mode": "tf",
     },
     "xl": {
         "first_conv_filter": 32,
@@ -118,6 +127,7 @@ BLOCK_CONFIGS = {
         "depthes": [4, 8, 8, 16, 24, 32, 8],
         "strides": [1, 2, 2, 2, 1, 2, 1],
         "use_ses": [0, 0, 0, 1, 1, 1, 1],
+        "rescale_mode": "tf",
     },
 }
 
@@ -270,7 +280,9 @@ def EfficientNetV2(
     first_conv_filter = blocks_config.get("first_conv_filter", out_channels[0])
     output_conv_filter = blocks_config.get("output_conv_filter", 1280)
     kernel_sizes = blocks_config.get("kernel_sizes", [3] * len(depthes))
-    rescale_mode = "tf" if pretrained is not None and pretrained.startswith("imagenet21k") else "torch"
+    # "torch" for all V1 models
+    # for V2 models, "21k" pretrained are all "tf", "imagenet" pretrained "bx" models are all "torch", ["s", "m", "l", "xl"] are "tf"
+    rescale_mode = "tf" if pretrained is not None and pretrained.startswith("imagenet21k") else blocks_config.get("rescale_mode", "torch")
 
     inputs = Input(shape=input_shape)
     if include_preprocessing and rescale_mode == "torch":
@@ -281,7 +293,7 @@ def EfficientNetV2(
         nn = Normalization(mean=mean, variance=std, axis=channel_axis)(inputs)
     elif include_preprocessing and rescale_mode == "tf":
         Rescaling = keras.layers.Rescaling if hasattr(keras.layers, "Rescaling") else keras.layers.experimental.preprocessing.Rescaling
-        nn = Rescaling(scale=1. / 128.0, offset=-1)(inputs)
+        nn = Rescaling(scale=1.0 / 128.0, offset=-1)(inputs)
     else:
         nn = inputs
     out_channel = _make_divisible(first_conv_filter, 8)
