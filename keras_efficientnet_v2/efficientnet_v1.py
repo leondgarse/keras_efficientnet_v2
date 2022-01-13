@@ -17,6 +17,7 @@ BLOCK_CONFIGS = {
         "strides": [1, 2, 2, 2, 1, 2, 1],
         "use_ses": [1, 1, 1, 1, 1, 1, 1],
         "kernel_sizes": [3, 3, 5, 3, 5, 5, 3],
+        "rescale_mode": "torch",
     },
     "b0": {"width": 1.0, "depth": 1.0},
     "b1": {"width": 1.0, "depth": 1.1},
@@ -27,7 +28,6 @@ BLOCK_CONFIGS = {
     "b6": {"width": 1.8, "depth": 2.6},
     "b7": {"width": 2.0, "depth": 3.1},
     "l2": {"width": 4.3, "depth": 5.3},
-    "rescale_mode": "torch",
 }
 
 
